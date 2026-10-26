@@ -1,10 +1,10 @@
 package kunuz.uz.api.controller;
 
 import jakarta.validation.Valid;
-import kunuz.uz.api.dto.request.profile.ProfileFilterDTO;
+import kunuz.uz.api.dto.request.profile.filter.ProfileFilterDTO;
 import kunuz.uz.api.dto.request.profile.ProfileRequestDTO;
 import kunuz.uz.api.dto.request.profile.BaseProfileDTO;
-import kunuz.uz.api.dto.response.ProfileResponseDTO;
+import kunuz.uz.api.dto.response.profile.ProfileResponseDTO;
 import kunuz.uz.api.service.ProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;

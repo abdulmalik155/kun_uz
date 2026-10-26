@@ -1,10 +1,11 @@
 package kunuz.uz.api.util;
 
-import kunuz.uz.api.dto.request.profile.ProfileRequestDTO;
 import kunuz.uz.api.dto.request.profile.BaseProfileDTO;
-import kunuz.uz.api.dto.response.ProfileResponseDTO;
+import kunuz.uz.api.dto.request.profile.ProfileRequestDTO;
+import kunuz.uz.api.dto.response.profile.ProfileResponseDTO;
 import kunuz.uz.api.entity.ProfileEntity;
 import kunuz.uz.api.enums.ProfileRole;
+import kunuz.uz.api.enums.ProfileStatus;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -21,7 +22,10 @@ public class ProfileUtil {
         }
         entity.setPhone(dto.getPhone().trim());
         entity.setPassword(dto.getPassword().trim());
-        entity.setStatus(dto.getStatus());
+        if (entity.getId() == null) {
+            entity.setStatus(ProfileStatus.ACTIVE);
+            entity.setVisible(true);
+        }
         entity.setRole(dto.getRole());
         return entity;
     }
@@ -49,7 +53,7 @@ public class ProfileUtil {
         }
     }
 
-    public static ProfileResponseDTO toDto(ProfileEntity entity) {
+    public static ProfileResponseDTO toResponseDto(ProfileEntity entity) {
         ProfileResponseDTO dto = new ProfileResponseDTO();
         dto.setId(entity.getId());
         dto.setName(entity.getName());
@@ -60,10 +64,10 @@ public class ProfileUtil {
         return dto;
     }
 
-    public static List<ProfileResponseDTO> toList(Iterable<ProfileEntity> iterable) {
+    public static List<ProfileResponseDTO> toResponseDtoList(Iterable<ProfileEntity> iterable) {
         List<ProfileResponseDTO> list = new LinkedList<>();
         for (ProfileEntity entity : iterable) {
-            list.add(toDto(entity));
+            list.add(toResponseDto(entity));
         }
         return list;
     }

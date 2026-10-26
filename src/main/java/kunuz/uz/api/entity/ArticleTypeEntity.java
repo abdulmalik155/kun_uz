@@ -3,6 +3,7 @@ package kunuz.uz.api.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.CurrentTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -23,7 +24,7 @@ public class ArticleTypeEntity {
     @Column(name = "order_number", nullable = false)
     private Integer orderNumber;
 
-    @Column(name = "name_uz", nullable = false, unique = true)
+    @Column(name = "name_uz", nullable = false, unique = true, columnDefinition = "varchar(255) default 'placeholder uzbek'")
     private String nameUz;
 
     @Column(name = "name_ru", nullable = false, unique = true, columnDefinition = "varchar(255) default 'placeholder russian'")
@@ -33,8 +34,9 @@ public class ArticleTypeEntity {
     private String nameEn;
 
     @Column(name = "visible", nullable = false, columnDefinition = "boolean default true")
-    private Boolean visible;
+    private Boolean visible = true;
 
+    @CurrentTimestamp
     @Column(name = "created_date", nullable = false)
     private LocalDateTime createdDate;
 }

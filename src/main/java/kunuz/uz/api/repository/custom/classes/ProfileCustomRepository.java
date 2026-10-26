@@ -2,7 +2,7 @@ package kunuz.uz.api.repository.custom.classes;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
-import kunuz.uz.api.dto.request.profile.ProfileFilterDTO;
+import kunuz.uz.api.dto.request.profile.filter.ProfileFilterDTO;
 import kunuz.uz.api.entity.ProfileEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
