@@ -1,16 +1,15 @@
-package kunuz.uz.api.dto.request;
+package kunuz.uz.api.dto.request.profile;
 
-
-import jakarta.validation.constraints.*;
-import kunuz.uz.api.enums.ProfileRole;
-import kunuz.uz.api.enums.ProfileStatus;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class ProfileRequestDTO {
-
+public class BaseProfileDTO {
     @NotBlank(message = "Name is required")
     @Size(min = 3, max = 255, message = "Minimum length of name is 3")
     private String name;
@@ -31,13 +30,4 @@ public class ProfileRequestDTO {
     @NotBlank(message = "Password is required")
     @Size(min = 8, max = 255, message = "minimum length of password is 8 characters")
     private String password;
-
-    @NotNull(message = "Profile status is required")
-    private ProfileStatus status;
-
-    @NotNull(message = "Profile role is required")
-    private ProfileRole role;
-
-
-
 }

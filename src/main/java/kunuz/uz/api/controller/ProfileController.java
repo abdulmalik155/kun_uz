@@ -1,31 +1,24 @@
 package kunuz.uz.api.controller;
 
 import jakarta.validation.Valid;
-import kunuz.uz.api.dto.request.ProfileRequestDTO;
+import kunuz.uz.api.dto.request.profile.ProfileFilterDTO;
+import kunuz.uz.api.dto.request.profile.ProfileRequestDTO;
+import kunuz.uz.api.dto.request.profile.BaseProfileDTO;
 import kunuz.uz.api.dto.response.ProfileResponseDTO;
 import kunuz.uz.api.service.ProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(value = "profile")
+@RequestMapping(value = "/api/profile")
 public class ProfileController {
 
     //2. Profile
-    //    1. Create profile (ADMIN) (can create MODERATOR,PUBLISHER))
-    //         (name,surname,email,phone,password,status,role)
-    //    2. Update Profile (ADMIN)
-    //    3. Update Profile Detail (ANY) (Profile updates own details)
-    //    4. Profile List (ADMIN) (Pagination)
-    //    5. Delete Profile By Id (ADMIN)
     //    6. Update Photo (ANY) (Murojat qilgan odamni rasmini upda qilish)   (remove old image)
     //           photo_id
-    //    7. Filter (name,surname,phone,role,created_date_from,created_date_to)
     @Autowired
     private ProfileService service;
 
@@ -34,5 +27,32 @@ public class ProfileController {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.create(dto));
     }
 
+    @PutMapping(value = "")
+    public ResponseEntity<ProfileResponseDTO> update(@RequestParam(value = "profileId") Long id, @Valid @RequestBody ProfileRequestDTO dto){
+        return ResponseEntity.ok(service.update(id, dto));
+    }
 
+    @PutMapping(value = "/update")
+    public ResponseEntity<ProfileResponseDTO> updateDetail(@RequestParam(value = "profileId") Long id, @Valid @RequestBody BaseProfileDTO dto){
+        return ResponseEntity.ok(service.updateDetail(id, dto));
+    }
+
+    @GetMapping(value = "/paging")
+    public ResponseEntity<Page<ProfileResponseDTO>> profileList(@RequestParam(value = "page", defaultValue = "1") int page,
+                                                                @RequestParam(value = "size", defaultValue = "10") int size){
+        return ResponseEntity.ok(service.profileList(page, size));
+    }
+
+    @DeleteMapping(value = "")
+    public ResponseEntity<?> deleteById(@RequestParam(value = "profileId") Long id){
+        service.deleteById(id);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @PostMapping(value = "/filter")
+    public ResponseEntity<Page<ProfileResponseDTO>> filter(@RequestParam(value = "page", defaultValue = "1") int page,
+                                                           @RequestParam(value = "size", defaultValue = "10") int size,
+                                                           @RequestBody ProfileFilterDTO dto){
+        return ResponseEntity.ok(service.filter(page,size, dto));
+    }
 }
