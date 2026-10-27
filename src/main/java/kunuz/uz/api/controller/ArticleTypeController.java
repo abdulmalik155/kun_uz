@@ -1,7 +1,7 @@
 package kunuz.uz.api.controller;
 
 import kunuz.uz.api.dto.request.articleType.ArticleTypeRequestDTO;
-import kunuz.uz.api.dto.response.article.ArticleTypeResponseDTO;
+import kunuz.uz.api.dto.response.articleType.ArticleTypeResponseDTO;
 import kunuz.uz.api.enums.Language;
 import kunuz.uz.api.mapper.articleType.ArticleTypeShort;
 import kunuz.uz.api.service.ArticleTypeService;
@@ -14,10 +14,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping(value = "/api/articleType")
 public class ArticleTypeController {
-
-//3. ArticleType
-//    5. Get By Lang (Language keladi shu language dagi name larini berib yuboramiz)
-//        (id,key,name) (name ga tegishli name_.. dagi qiymat qo'yiladi.)
 
     @Autowired
     private ArticleTypeService service;

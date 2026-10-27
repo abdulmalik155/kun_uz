@@ -17,7 +17,7 @@ public class CategoryEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "order_number", nullable = false)
+    @Column(name = "order_number", nullable = false, unique = true)
     private Integer orderNumber;
 
     @Column(name = "name_uz", nullable = false, unique = true)

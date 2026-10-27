@@ -27,22 +27,25 @@ public class ProfileService {
     @Autowired
     private ProfileCustomRepository customRepository;
 
+    @Autowired
+    private ProfileUtil util;
+
     public ProfileResponseDTO create(ProfileRequestDTO dto) {
-        ProfileUtil.check(dto);
-        ProfileEntity entity = ProfileUtil.toEntity(dto, new ProfileEntity());
+        util.check(dto);
+        ProfileEntity entity = util.toEntity(dto, new ProfileEntity());
         repository.save(entity);
-        return ProfileUtil.toResponseDto(entity);
+        return util.toResponseDto(entity);
     }
 
     public ProfileResponseDTO update(Long id, ProfileRequestDTO dto) {
-        ProfileUtil.check(dto);
-        ProfileEntity updatedEntity = repository.save(ProfileUtil.toEntity(dto, getEntityOrThrow(id)));
-        return ProfileUtil.toResponseDto(updatedEntity);
+        util.check(dto);
+        ProfileEntity updatedEntity = repository.save(util.toEntity(dto, getEntityOrThrow(id)));
+        return util.toResponseDto(updatedEntity);
     }
 
-    public ProfileResponseDTO updateDetail(Long id, @Valid BaseProfileDTO dto) {
-        ProfileEntity updatedEntity = repository.save(ProfileUtil.toEntityDetail(dto, getEntityOrThrow(id)));
-        return ProfileUtil.toResponseDto(updatedEntity);
+    public ProfileResponseDTO updateWithDetail(Long id, @Valid BaseProfileDTO dto) {
+        ProfileEntity updatedEntity = repository.save(util.toEntityForUpdate(dto, getEntityOrThrow(id)));
+        return util.toResponseDto(updatedEntity);
     }
 
     private ProfileEntity getEntityOrThrow(Long id){
@@ -55,7 +58,7 @@ public class ProfileService {
         page--;
         PageRequest request = PageRequest.of(page,size, Sort.by("createdDate").descending());
         Page<ProfileEntity> entities = repository.findAll(request);
-        return new PageImpl<>(ProfileUtil.toResponseDtoList(entities.getContent()), entities.getPageable(), entities.getTotalElements());
+        return new PageImpl<>(util.toResponseDtoList(entities.getContent()), entities.getPageable(), entities.getTotalElements());
     }
 
     public void deleteById(Long id) {
@@ -66,6 +69,6 @@ public class ProfileService {
         PaginationUtil.check(page,size);
         page--;
         Page<ProfileEntity> entities = customRepository.filter(page,size,dto);
-        return new PageImpl<>(ProfileUtil.toResponseDtoList(entities.getContent()), entities.getPageable(), entities.getTotalElements());
+        return new PageImpl<>(util.toResponseDtoList(entities.getContent()), entities.getPageable(), entities.getTotalElements());
     }
 }

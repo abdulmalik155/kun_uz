@@ -6,13 +6,15 @@ import kunuz.uz.api.dto.response.profile.ProfileResponseDTO;
 import kunuz.uz.api.entity.ProfileEntity;
 import kunuz.uz.api.enums.ProfileRole;
 import kunuz.uz.api.enums.ProfileStatus;
+import org.springframework.stereotype.Component;
 
 import java.util.LinkedList;
 import java.util.List;
 
-public class ProfileUtil {
+@Component
+public class ProfileUtil implements EntityUpdateMethodUtil<BaseProfileDTO, ProfileRequestDTO, ProfileResponseDTO, ProfileEntity> {
 
-    public static ProfileEntity toEntity(ProfileRequestDTO dto, ProfileEntity entity) {
+    public ProfileEntity toEntity(ProfileRequestDTO dto, ProfileEntity entity) {
         entity.setName(dto.getName().trim());
         if (dto.getSurname() != null && !dto.getSurname().isBlank()) {
             entity.setSurname(dto.getSurname());
@@ -30,7 +32,7 @@ public class ProfileUtil {
         return entity;
     }
 
-    public static ProfileEntity toEntityDetail(BaseProfileDTO dto, ProfileEntity entity) {
+    public ProfileEntity toEntityForUpdate(BaseProfileDTO dto, ProfileEntity entity) {
         entity.setName(dto.getName().trim());
         if (dto.getSurname() != null && !dto.getSurname().isBlank()) {
             entity.setSurname(dto.getSurname());
@@ -44,7 +46,7 @@ public class ProfileUtil {
     }
 
 
-    public static void check(ProfileRequestDTO dto) {
+    public void check(ProfileRequestDTO dto) {
         /*if (dto.getSurname() != null && dto.getSurname().trim().length() < 3) {
             throw new IllegalArgumentException("Invalid surname. Surname can not be empty");
         }*/
@@ -53,7 +55,7 @@ public class ProfileUtil {
         }
     }
 
-    public static ProfileResponseDTO toResponseDto(ProfileEntity entity) {
+    public ProfileResponseDTO toResponseDto(ProfileEntity entity) {
         ProfileResponseDTO dto = new ProfileResponseDTO();
         dto.setId(entity.getId());
         dto.setName(entity.getName());
@@ -64,7 +66,7 @@ public class ProfileUtil {
         return dto;
     }
 
-    public static List<ProfileResponseDTO> toResponseDtoList(Iterable<ProfileEntity> iterable) {
+    public List<ProfileResponseDTO> toResponseDtoList(Iterable<ProfileEntity> iterable) {
         List<ProfileResponseDTO> list = new LinkedList<>();
         for (ProfileEntity entity : iterable) {
             list.add(toResponseDto(entity));

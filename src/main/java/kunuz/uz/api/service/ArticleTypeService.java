@@ -1,7 +1,7 @@
 package kunuz.uz.api.service;
 
 import kunuz.uz.api.dto.request.articleType.ArticleTypeRequestDTO;
-import kunuz.uz.api.dto.response.article.ArticleTypeResponseDTO;
+import kunuz.uz.api.dto.response.articleType.ArticleTypeResponseDTO;
 import kunuz.uz.api.entity.ArticleTypeEntity;
 import kunuz.uz.api.enums.Language;
 import kunuz.uz.api.exceptions.articleType.ArticleTypeNotFoundException;
@@ -26,16 +26,19 @@ public class ArticleTypeService {
     @Autowired
     private ArticleTypeCustomRepository customRepository;
 
+    @Autowired
+    private ArticleTypeUtil util;
+
 
     public ArticleTypeResponseDTO create(ArticleTypeRequestDTO dto) {
-        ArticleTypeEntity entity = repository.save(ArticleTypeUtil.toEntity(dto, new ArticleTypeEntity()));
-        return ArticleTypeUtil.toResponseDto(entity);
+        ArticleTypeEntity entity = repository.save(util.toEntity(dto, new ArticleTypeEntity()));
+        return util.toResponseDto(entity);
     }
 
     public ArticleTypeResponseDTO update(Integer id, ArticleTypeRequestDTO dto) {
-        ArticleTypeEntity entity = ArticleTypeUtil.toEntity(dto, getEntityOrThrow(id));
+        ArticleTypeEntity entity = util.toEntity(dto, getEntityOrThrow(id));
         repository.save(entity);
-        return ArticleTypeUtil.toResponseDto(entity);
+        return util.toResponseDto(entity);
     }
 
     private ArticleTypeEntity getEntityOrThrow(Integer id) {
@@ -52,7 +55,7 @@ public class ArticleTypeService {
         page--;
         PageRequest request = PageRequest.of(page, size, Sort.by("createdDate").descending());
         Page<ArticleTypeEntity> entities = repository.findAll(request);
-        return new PageImpl<>(ArticleTypeUtil.toResponseDtoList(entities.getContent()), entities.getPageable(), entities.getTotalElements());
+        return new PageImpl<>(util.toResponseDtoList(entities.getContent()), entities.getPageable(), entities.getTotalElements());
     }
 
     public Page<ArticleTypeShort> getByLanguage(int page, int size, Language language) {
@@ -62,7 +65,7 @@ public class ArticleTypeService {
 
         Page<Object[]> entities = customRepository.getByLanguage(page,size,language);
 
-        return new PageImpl<>(ArticleTypeUtil
+        return new PageImpl<>(util
                 .shortToResponseDtoList(
                         entities.getContent()
                 ),

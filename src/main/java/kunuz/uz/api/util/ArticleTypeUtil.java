@@ -1,16 +1,18 @@
 package kunuz.uz.api.util;
 
 import kunuz.uz.api.dto.request.articleType.ArticleTypeRequestDTO;
-import kunuz.uz.api.dto.response.article.ArticleTypeResponseDTO;
+import kunuz.uz.api.dto.response.articleType.ArticleTypeResponseDTO;
 import kunuz.uz.api.entity.ArticleTypeEntity;
 import kunuz.uz.api.mapper.articleType.ArticleTypeShort;
+import org.springframework.stereotype.Component;
 
 import java.util.LinkedList;
 import java.util.List;
 
-public class ArticleTypeUtil {
+@Component
+public class ArticleTypeUtil implements BaseEntityUtil<ArticleTypeRequestDTO, ArticleTypeResponseDTO, ArticleTypeEntity> {
 
-    public static ArticleTypeEntity toEntity(ArticleTypeRequestDTO dto, ArticleTypeEntity entity){
+    public ArticleTypeEntity toEntity(ArticleTypeRequestDTO dto, ArticleTypeEntity entity){
         entity.setOrderNumber(dto.getOrderNumber());
         entity.setNameUz(dto.getNameUz());
         entity.setNameRu(dto.getNameRu());
@@ -21,7 +23,7 @@ public class ArticleTypeUtil {
         return entity;
     }
 
-    public static ArticleTypeResponseDTO toResponseDto(ArticleTypeEntity entity){
+    public ArticleTypeResponseDTO toResponseDto(ArticleTypeEntity entity){
         ArticleTypeResponseDTO dto = new ArticleTypeResponseDTO();
         dto.setId(entity.getId());
         dto.setNameUz(entity.getNameUz());
@@ -33,7 +35,7 @@ public class ArticleTypeUtil {
     }
 
 
-    public static List<ArticleTypeResponseDTO> toResponseDtoList(Iterable<ArticleTypeEntity> iterable){
+    public List<ArticleTypeResponseDTO> toResponseDtoList(Iterable<ArticleTypeEntity> iterable){
         List<ArticleTypeResponseDTO> list = new LinkedList<>();
         for (ArticleTypeEntity articleTypeEntity : iterable) {
             list.add(toResponseDto(articleTypeEntity));
@@ -41,7 +43,7 @@ public class ArticleTypeUtil {
         return list;
     }
 
-    public static List<ArticleTypeShort> shortToResponseDtoList(Iterable <Object[]> iterable){
+    public List<ArticleTypeShort> shortToResponseDtoList(Iterable <Object[]> iterable){
         List<ArticleTypeShort> list = new LinkedList<>();
         for (Object[] articleType : iterable) {
             ArticleTypeShort dto = new ArticleTypeShort();

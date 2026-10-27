@@ -3,11 +3,12 @@ package kunuz.uz.api.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.CurrentTimestamp;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "region_entity")
+@Table(name = "region")
 @Getter
 @Setter
 
@@ -17,10 +18,10 @@ public class RegionEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "order_number", nullable = false)
+    @Column(name = "order_number", nullable = false, unique = true)
     private Integer orderNumber;
 
-    @Column(name = "name_uz", nullable = false, unique = true)
+    @Column(name = "name_uz", nullable = false, unique = true,columnDefinition = "varchar(255) default 'placeholder uzbek'")
     private String nameUz;
 
     @Column(name = "name_ru", nullable = false, unique = true, columnDefinition = "varchar(255) default 'placeholder russian'")
@@ -32,6 +33,7 @@ public class RegionEntity {
     @Column(name = "visible", nullable = false, columnDefinition = "boolean default true")
     private Boolean visible;
 
+    @CurrentTimestamp
     @Column(name = "created_date", nullable = false)
     private LocalDateTime createdDate;
 }

@@ -34,7 +34,7 @@ public class ProfileController {
 
     @PutMapping(value = "/update")
     public ResponseEntity<ProfileResponseDTO> updateDetail(@RequestParam(value = "profileId") Long id, @Valid @RequestBody BaseProfileDTO dto){
-        return ResponseEntity.ok(service.updateDetail(id, dto));
+        return ResponseEntity.ok(service.updateWithDetail(id, dto));
     }
 
     @GetMapping(value = "/paging")

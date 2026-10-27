@@ -1,4 +1,4 @@
-package kunuz.uz.api.dto.response.article;
+package kunuz.uz.api.dto.response.region;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -7,7 +7,8 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-public class ArticleTypeResponseDTO {
+public class RegionResponseDTO {
+    //  (id,key,name_uz, name_ru, name_en,visible,created_date)
 
     private Integer id;
     private String nameUz;
