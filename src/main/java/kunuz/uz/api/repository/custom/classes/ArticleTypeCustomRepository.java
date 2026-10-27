@@ -73,6 +73,7 @@ public class ArticleTypeCustomRepository {
         StringBuilder selectQueryBuilder = new StringBuilder("select a.id as id ");
         String countQueryBuilder = "select count(a) as count from ArticleTypeEntity a";
         StringBuilder queryBuilder = queryBuilder(language);
+        queryBuilder.append(" order by a.orderNumber asc");
         selectQueryBuilder.append(queryBuilder);
 
         Query selectQuery = entityManager.createQuery(selectQueryBuilder.toString());

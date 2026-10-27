@@ -12,7 +12,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 @Component
-public class ProfileUtil implements EntityUpdateMethodUtil<BaseProfileDTO, ProfileRequestDTO, ProfileResponseDTO, ProfileEntity> {
+public class ProfileUtil implements EntityUpdate<BaseProfileDTO, ProfileRequestDTO, ProfileResponseDTO, ProfileEntity> {
 
     public ProfileEntity toEntity(ProfileRequestDTO dto, ProfileEntity entity) {
         entity.setName(dto.getName().trim());

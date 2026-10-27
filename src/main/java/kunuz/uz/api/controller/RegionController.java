@@ -5,6 +5,8 @@ import kunuz.uz.api.dto.request.region.BaseRegionDTO;
 import kunuz.uz.api.dto.request.region.RegionRequestDTO;
 import kunuz.uz.api.dto.request.region.filter.RegionFilterDTO;
 import kunuz.uz.api.dto.response.region.RegionResponseDTO;
+import kunuz.uz.api.enums.Language;
+import kunuz.uz.api.mapper.region.RegionShort;
 import kunuz.uz.api.service.RegionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -18,10 +20,6 @@ public class RegionController {
 
     @Autowired
     private RegionService service;
-
-    //4. Region
-    //    5. Get By Lang (Language keladi shu language dagi name larini berib yuboramiz)
-    //        (id,key,name) (name ga tegishli name_.. dagi qiymat qo'yiladi.) (visible true)
 
     @PostMapping(value = "")
     public ResponseEntity<RegionResponseDTO> create(@Valid @RequestBody RegionRequestDTO dto){
@@ -47,7 +45,12 @@ public class RegionController {
         return ResponseEntity.ok(service.getRegionList(page,size,dto));
     }
 
-
+    @GetMapping(value = "/getByLanguage")
+    public ResponseEntity<Page<RegionShort>> getByLang(@RequestParam(value = "page", defaultValue = "1") int page,
+                                                       @RequestParam(value = "size", defaultValue = "10") int size,
+                                                       @RequestParam(value = "language", defaultValue = "UZ") Language language){
+        return ResponseEntity.ok(service.getByLanguage(page,size,language));
+    }
 
 
 }

@@ -5,7 +5,10 @@ import kunuz.uz.api.dto.request.region.RegionRequestDTO;
 import kunuz.uz.api.dto.request.region.filter.RegionFilterDTO;
 import kunuz.uz.api.dto.response.region.RegionResponseDTO;
 import kunuz.uz.api.entity.RegionEntity;
+import kunuz.uz.api.enums.Language;
 import kunuz.uz.api.exceptions.region.RegionNotFoundException;
+import kunuz.uz.api.mapper.articleType.ArticleTypeShort;
+import kunuz.uz.api.mapper.region.RegionShort;
 import kunuz.uz.api.repository.custom.classes.RegionCustomRepository;
 import kunuz.uz.api.repository.interfaces.RegionRepository;
 import kunuz.uz.api.util.PaginationUtil;
@@ -63,5 +66,20 @@ public class RegionService {
         Page<RegionEntity> entities = customRepository.findAll(page,size,dto);
         List<RegionResponseDTO> responseDTOList = util.toResponseDtoList(entities.getContent());
         return new PageImpl<>(responseDTOList, entities.getPageable(), entities.getTotalElements());
+    }
+
+    public Page<RegionShort> getByLanguage(int page, int size, Language language) {
+        PaginationUtil.check(page, size);
+        page--;
+        if (language == null ) throw new IllegalArgumentException("Language of name of region can not be empty");
+
+        Page<Object[]> entities = customRepository.getByLanguage(page,size,language);
+
+        return new PageImpl<>(util
+                .shortToResponseDtoList(
+                        entities.getContent()
+                ),
+                entities.getPageable(),
+                entities.getTotalElements());
     }
 }

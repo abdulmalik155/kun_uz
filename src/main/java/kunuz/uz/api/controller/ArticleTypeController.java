@@ -44,7 +44,7 @@ public class ArticleTypeController {
     @GetMapping(value = "/getByLanguage")
     public ResponseEntity<Page<ArticleTypeShort>> getByLang(@RequestParam(value = "page", defaultValue = "1") int page,
                                                             @RequestParam(value = "size", defaultValue = "10") int size,
-                                                            @RequestParam(value = "language") Language language){
+                                                            @RequestParam(value = "language",defaultValue = "UZ") Language language){
         return ResponseEntity.ok(service.getByLanguage(page,size,language));
     }
 }

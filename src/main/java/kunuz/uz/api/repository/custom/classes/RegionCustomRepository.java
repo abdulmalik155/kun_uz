@@ -4,6 +4,9 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import kunuz.uz.api.dto.request.region.filter.RegionFilterDTO;
 import kunuz.uz.api.entity.RegionEntity;
+import kunuz.uz.api.enums.Language;
+import kunuz.uz.api.exceptions.articleType.LanguageNotSupportedException;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -70,4 +73,44 @@ public class RegionCustomRepository {
         return new PageImpl<>(contents, request, totalElements);
     }
 
+    public Page<Object[]> getByLanguage(int page, int size, Language language) {
+        StringBuilder selectQueryBuilder = new StringBuilder("select r.id as id ");
+        String countQueryBuilder = "select count(r) as count from RegionEntity r";
+        StringBuilder queryBuilder = queryBuilder(language);
+        queryBuilder.append(" order by r.orderNumber asc");
+        selectQueryBuilder.append(queryBuilder);
+
+        Query selectQuery = entityManager.createQuery(selectQueryBuilder.toString());
+        selectQuery.setFirstResult(page * size);
+        selectQuery.setMaxResults(size);
+
+        Query countQuery = entityManager.createQuery(countQueryBuilder);
+
+        List<Object[]> regionArray = selectQuery.getResultList();
+        Long totalElements = (Long) countQuery.getSingleResult();
+        PageRequest pageRequest = PageRequest.of(page, size);
+        return new PageImpl<>(regionArray, pageRequest, totalElements);
+    }
+
+    private @NonNull StringBuilder queryBuilder(Language language) {
+        StringBuilder queryBuilder = new StringBuilder();
+        if (language != null) {
+            switch (language) {
+                case Language.UZ -> {
+                    queryBuilder.append(", r.nameUz as nameUz ");
+                    queryBuilder.append(" from RegionEntity as r");
+                }
+                case Language.RU -> {
+                    queryBuilder.append(", r.nameRu as nameRu ");
+                    queryBuilder.append(" from RegionEntity as r");
+                }
+                case Language.EN -> {
+                    queryBuilder.append(", r.nameEn as nameEn ");
+                    queryBuilder.append(" from RegionEntity as r");
+                }
+                default -> throw new LanguageNotSupportedException(String.format("Given language %s is not supported", language));
+            }
+        }
+        return queryBuilder;
+    }
 }

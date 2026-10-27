@@ -10,7 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 @Component
-public class ArticleTypeUtil implements BaseEntityUtil<ArticleTypeRequestDTO, ArticleTypeResponseDTO, ArticleTypeEntity> {
+public class ArticleTypeUtil implements BaseEntityUtil<ArticleTypeRequestDTO, ArticleTypeResponseDTO, ArticleTypeEntity>, MappingFromArray<ArticleTypeShort> {
 
     public ArticleTypeEntity toEntity(ArticleTypeRequestDTO dto, ArticleTypeEntity entity){
         entity.setOrderNumber(dto.getOrderNumber());
@@ -43,9 +43,10 @@ public class ArticleTypeUtil implements BaseEntityUtil<ArticleTypeRequestDTO, Ar
         return list;
     }
 
-    public List<ArticleTypeShort> shortToResponseDtoList(Iterable <Object[]> iterable){
+    @Override
+    public List<ArticleTypeShort> shortToResponseDtoList(List<Object[]> content) {
         List<ArticleTypeShort> list = new LinkedList<>();
-        for (Object[] articleType : iterable) {
+        for (Object[] articleType : content) {
             ArticleTypeShort dto = new ArticleTypeShort();
             dto.setId((Integer) articleType[0]);
             dto.setName((String) articleType[1]);
@@ -53,5 +54,4 @@ public class ArticleTypeUtil implements BaseEntityUtil<ArticleTypeRequestDTO, Ar
         }
         return list;
     }
-
 }
