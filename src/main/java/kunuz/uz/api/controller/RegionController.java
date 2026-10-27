@@ -3,9 +3,11 @@ package kunuz.uz.api.controller;
 import jakarta.validation.Valid;
 import kunuz.uz.api.dto.request.region.BaseRegionDTO;
 import kunuz.uz.api.dto.request.region.RegionRequestDTO;
+import kunuz.uz.api.dto.request.region.filter.RegionFilterDTO;
 import kunuz.uz.api.dto.response.region.RegionResponseDTO;
 import kunuz.uz.api.service.RegionService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,13 +20,6 @@ public class RegionController {
     private RegionService service;
 
     //4. Region
-    //    1. Create  (ADMIN)
-    //        (order_number,name_uz, name_ru, name_en)
-    //    2. Update by id (ADMIN)
-    //        (key,name_uz, name_ru, name_en)
-    //    3. Delete by id (ADMIN)
-    //    4. Get List (ADMIN) (Pagination)
-    //        (id,key,name_uz, name_ru, name_en,visible,created_date)
     //    5. Get By Lang (Language keladi shu language dagi name larini berib yuboramiz)
     //        (id,key,name) (name ga tegishli name_.. dagi qiymat qo'yiladi.) (visible true)
 
@@ -39,6 +34,18 @@ public class RegionController {
         return ResponseEntity.ok(service.updateById(id,dto));
     }
 
+    @DeleteMapping(value = "")
+    public ResponseEntity<?> deleteById(@RequestParam(value = "regionId") Integer id){
+        service.deleteById(id);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @PostMapping(value = "/paging")
+    public ResponseEntity<Page<RegionResponseDTO>> getRegionList(@RequestParam(value = "page", defaultValue = "1") int page,
+                                                           @RequestParam(value = "size", defaultValue = "10") int size,
+                                                           @RequestBody RegionFilterDTO dto){
+        return ResponseEntity.ok(service.getRegionList(page,size,dto));
+    }
 
 
 
