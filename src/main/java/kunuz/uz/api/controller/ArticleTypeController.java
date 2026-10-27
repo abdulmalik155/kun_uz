@@ -2,6 +2,8 @@ package kunuz.uz.api.controller;
 
 import kunuz.uz.api.dto.request.articleType.ArticleTypeRequestDTO;
 import kunuz.uz.api.dto.response.article.ArticleTypeResponseDTO;
+import kunuz.uz.api.enums.Language;
+import kunuz.uz.api.mapper.articleType.ArticleTypeShort;
 import kunuz.uz.api.service.ArticleTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -39,9 +41,14 @@ public class ArticleTypeController {
 
     @GetMapping(value = "")
     public ResponseEntity<Page<ArticleTypeResponseDTO>> paging (@RequestParam(value = "page", defaultValue = "1") int page,
-                                                                @RequestParam(value = "size", defaultValue = "2") int size){
+                                                                @RequestParam(value = "size", defaultValue = "10") int size){
         return ResponseEntity.ok(service.paging(page,size));
     }
 
-
+    @GetMapping(value = "/getByLanguage")
+    public ResponseEntity<Page<ArticleTypeShort>> getByLang(@RequestParam(value = "page", defaultValue = "1") int page,
+                                                            @RequestParam(value = "size", defaultValue = "10") int size,
+                                                            @RequestParam(value = "language") Language language){
+        return ResponseEntity.ok(service.getByLanguage(page,size,language));
+    }
 }

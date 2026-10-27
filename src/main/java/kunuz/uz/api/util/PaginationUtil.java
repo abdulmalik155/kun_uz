@@ -8,6 +8,5 @@ public class PaginationUtil {
         if(size <= 0){
             throw new IllegalArgumentException("Invalid size info");
         }
-
     }
 }

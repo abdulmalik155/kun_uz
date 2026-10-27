@@ -3,7 +3,10 @@ package kunuz.uz.api.service;
 import kunuz.uz.api.dto.request.articleType.ArticleTypeRequestDTO;
 import kunuz.uz.api.dto.response.article.ArticleTypeResponseDTO;
 import kunuz.uz.api.entity.ArticleTypeEntity;
+import kunuz.uz.api.enums.Language;
 import kunuz.uz.api.exceptions.articleType.ArticleTypeNotFoundException;
+import kunuz.uz.api.mapper.articleType.ArticleTypeShort;
+import kunuz.uz.api.repository.custom.classes.ArticleTypeCustomRepository;
 import kunuz.uz.api.repository.interfaces.ArticleTypeRepository;
 import kunuz.uz.api.util.ArticleTypeUtil;
 import kunuz.uz.api.util.PaginationUtil;
@@ -19,6 +22,10 @@ public class ArticleTypeService {
 
     @Autowired
     private ArticleTypeRepository repository;
+
+    @Autowired
+    private ArticleTypeCustomRepository customRepository;
+
 
     public ArticleTypeResponseDTO create(ArticleTypeRequestDTO dto) {
         ArticleTypeEntity entity = repository.save(ArticleTypeUtil.toEntity(dto, new ArticleTypeEntity()));
@@ -46,5 +53,20 @@ public class ArticleTypeService {
         PageRequest request = PageRequest.of(page, size, Sort.by("createdDate").descending());
         Page<ArticleTypeEntity> entities = repository.findAll(request);
         return new PageImpl<>(ArticleTypeUtil.toResponseDtoList(entities.getContent()), entities.getPageable(), entities.getTotalElements());
+    }
+
+    public Page<ArticleTypeShort> getByLanguage(int page, int size, Language language) {
+        PaginationUtil.check(page, size);
+        page--;
+        if (language == null ) throw new IllegalArgumentException("Language of name of article can not be empty");
+
+        Page<Object[]> entities = customRepository.getByLanguage(page,size,language);
+
+        return new PageImpl<>(ArticleTypeUtil
+                .shortToResponseDtoList(
+                        entities.getContent()
+                ),
+                entities.getPageable(),
+                entities.getTotalElements());
     }
 }

@@ -3,6 +3,7 @@ package kunuz.uz.api.util;
 import kunuz.uz.api.dto.request.articleType.ArticleTypeRequestDTO;
 import kunuz.uz.api.dto.response.article.ArticleTypeResponseDTO;
 import kunuz.uz.api.entity.ArticleTypeEntity;
+import kunuz.uz.api.mapper.articleType.ArticleTypeShort;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -40,5 +41,15 @@ public class ArticleTypeUtil {
         return list;
     }
 
+    public static List<ArticleTypeShort> shortToResponseDtoList(Iterable <Object[]> iterable){
+        List<ArticleTypeShort> list = new LinkedList<>();
+        for (Object[] articleType : iterable) {
+            ArticleTypeShort dto = new ArticleTypeShort();
+            dto.setId((Integer) articleType[0]);
+            dto.setName((String) articleType[1]);
+            list.add(dto);
+        }
+        return list;
+    }
 
 }
