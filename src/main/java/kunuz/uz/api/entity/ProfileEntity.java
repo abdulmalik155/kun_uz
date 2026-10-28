@@ -42,7 +42,7 @@ public class ProfileEntity {
     @Enumerated(EnumType.STRING)
     private ProfileStatus status;
 
-    @Column(name = "role", nullable = false)
+    @Column(name = "role", nullable = false, updatable = false)
     @Enumerated(EnumType.STRING)
     private ProfileRole role;
 

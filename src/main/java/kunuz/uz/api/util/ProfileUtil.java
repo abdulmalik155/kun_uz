@@ -27,8 +27,6 @@ public class ProfileUtil implements BaseEntityUtil<BaseProfileDTO, ProfileRespon
         if (entity.getId() == null) {
             entity.setStatus(ProfileStatus.ACTIVE);
             entity.setVisible(true);
-        }
-        if (dto.getClass().equals(ProfileRequestDTO.class) && ((ProfileRequestDTO) dto).getRole() != null) {
             entity.setRole(((ProfileRequestDTO) (dto)).getRole());
         }
         return entity;

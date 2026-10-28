@@ -27,14 +27,14 @@ public class RegionController {
     }
 
     @PutMapping(value = "")
-    public ResponseEntity<RegionResponseDTO> updateById(@RequestParam(value = "regionId") Integer id,
+    public ResponseEntity<RegionResponseDTO> update(@RequestParam(value = "regionId") Integer id,
                                                         @Valid @RequestBody BaseRegionDTO dto){
-        return ResponseEntity.ok(service.updateById(id,dto));
+        return ResponseEntity.ok(service.update(id,dto));
     }
 
     @DeleteMapping(value = "")
-    public ResponseEntity<?> deleteById(@RequestParam(value = "regionId") Integer id){
-        service.deleteById(id);
+    public ResponseEntity<?> delete(@RequestParam(value = "regionId") Integer id){
+        service.delete(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
@@ -45,10 +45,10 @@ public class RegionController {
     }
 
     @PostMapping(value = "/filter")
-    public ResponseEntity<Page<RegionResponseDTO>> filter(@RequestParam(value = "page", defaultValue = "1") int page,
+    public ResponseEntity<Page<RegionResponseDTO>> regionList(@RequestParam(value = "page", defaultValue = "1") int page,
                                                            @RequestParam(value = "size", defaultValue = "10") int size,
                                                            @RequestBody RegionFilterDTO dto){
-        return ResponseEntity.ok(service.filter(page,size,dto));
+        return ResponseEntity.ok(service.regionList(page,size,dto));
     }
 
     @GetMapping(value = "/getByLanguage")

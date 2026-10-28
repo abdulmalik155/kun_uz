@@ -3,9 +3,7 @@ package kunuz.uz.api.service;
 import kunuz.uz.api.dto.request.region.BaseRegionDTO;
 import kunuz.uz.api.dto.request.region.RegionRequestDTO;
 import kunuz.uz.api.dto.request.region.filter.RegionFilterDTO;
-import kunuz.uz.api.dto.response.profile.ProfileResponseDTO;
 import kunuz.uz.api.dto.response.region.RegionResponseDTO;
-import kunuz.uz.api.entity.ProfileEntity;
 import kunuz.uz.api.entity.RegionEntity;
 import kunuz.uz.api.enums.Language;
 import kunuz.uz.api.exceptions.region.RegionNotFoundException;
@@ -42,7 +40,7 @@ public class RegionService {
         return responseDTO;
     }
 
-    public RegionResponseDTO updateById(Integer id, BaseRegionDTO dto) {
+    public RegionResponseDTO update(Integer id, BaseRegionDTO dto) {
         RegionEntity entityToUpdate =  getEntityOrThrow(id);
         entityToUpdate = util.toEntity(dto, entityToUpdate);
         RegionEntity updated = repository.save(entityToUpdate);
@@ -56,14 +54,14 @@ public class RegionService {
                         ()-> new RegionNotFoundException(String.format("Region with given %s id doesn't exist", id)));
     }
 
-    public void deleteById(Integer id) {
+    public void delete(Integer id) {
 //        repository.deleteById(id);
         RegionEntity existingEntity = getEntityOrThrow(id);
         existingEntity.setVisible(false);
         repository.save(existingEntity);
     }
 
-    public Page<RegionResponseDTO> filter(int page, int size, RegionFilterDTO dto) {
+    public Page<RegionResponseDTO> regionList(int page, int size, RegionFilterDTO dto) {
         PaginationUtil.check(page,size);
         page--;
         Page<RegionEntity> entities = customRepository.filter(page,size,dto);

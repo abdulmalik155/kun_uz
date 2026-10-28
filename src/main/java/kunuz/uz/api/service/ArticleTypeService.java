@@ -75,7 +75,7 @@ public class ArticleTypeService {
                 entities.getTotalElements());
     }
 
-    public Page<ArticleTypeResponseDTO> paging(int page, int size) {
+    public Page<ArticleTypeResponseDTO> articleTypeList(int page, int size) {
         PaginationUtil.check(page, size);
         page--;
         PageRequest request = PageRequest.of(page, size, Sort.by("createdDate").descending());
