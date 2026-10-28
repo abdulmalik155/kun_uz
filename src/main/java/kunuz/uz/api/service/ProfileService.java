@@ -53,7 +53,7 @@ public class ProfileService {
                 .orElseThrow(() -> new ProfileNotFoundException(String.format("There is no profile with such id %s", id)));
     }
 
-    public Page<ProfileResponseDTO> profileList(int page, int size) {
+    public Page<ProfileResponseDTO> paging(int page, int size) {
         PaginationUtil.check(page, size);
         page--;
         PageRequest request = PageRequest.of(page,size, Sort.by("createdDate").descending());

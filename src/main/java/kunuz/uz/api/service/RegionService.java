@@ -3,11 +3,12 @@ package kunuz.uz.api.service;
 import kunuz.uz.api.dto.request.region.BaseRegionDTO;
 import kunuz.uz.api.dto.request.region.RegionRequestDTO;
 import kunuz.uz.api.dto.request.region.filter.RegionFilterDTO;
+import kunuz.uz.api.dto.response.profile.ProfileResponseDTO;
 import kunuz.uz.api.dto.response.region.RegionResponseDTO;
+import kunuz.uz.api.entity.ProfileEntity;
 import kunuz.uz.api.entity.RegionEntity;
 import kunuz.uz.api.enums.Language;
 import kunuz.uz.api.exceptions.region.RegionNotFoundException;
-import kunuz.uz.api.mapper.articleType.ArticleTypeShort;
 import kunuz.uz.api.mapper.region.RegionShort;
 import kunuz.uz.api.repository.custom.classes.RegionCustomRepository;
 import kunuz.uz.api.repository.interfaces.RegionRepository;
@@ -21,7 +22,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class RegionService {
@@ -60,7 +60,7 @@ public class RegionService {
         repository.deleteById(id);
     }
 
-    public Page<RegionResponseDTO> filteredList(int page, int size, RegionFilterDTO dto) {
+    public Page<RegionResponseDTO> filter(int page, int size, RegionFilterDTO dto) {
         PaginationUtil.check(page,size);
         page--;
         Page<RegionEntity> entities = customRepository.filter(page,size,dto);
@@ -79,6 +79,18 @@ public class RegionService {
                 .shortToResponseDtoList(
                         entities.getContent()
                 ),
+                entities.getPageable(),
+                entities.getTotalElements());
+    }
+
+
+    public Page<RegionResponseDTO> paging(int page, int size) {
+        PaginationUtil.check(page, size);
+        page--;
+        PageRequest request = PageRequest.of(page,size, Sort.by("createdDate").descending());
+        Page<RegionEntity> entities = repository.findAll(request);
+        return new PageImpl<>(util
+                .toResponseDtoList(entities.getContent()),
                 entities.getPageable(),
                 entities.getTotalElements());
     }

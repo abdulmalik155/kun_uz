@@ -38,9 +38,9 @@ public class ProfileController {
     }
 
     @GetMapping(value = "/paging")
-    public ResponseEntity<Page<ProfileResponseDTO>> profileList(@RequestParam(value = "page", defaultValue = "1") int page,
+    public ResponseEntity<Page<ProfileResponseDTO>> paging(@RequestParam(value = "page", defaultValue = "1") int page,
                                                                 @RequestParam(value = "size", defaultValue = "10") int size){
-        return ResponseEntity.ok(service.profileList(page, size));
+        return ResponseEntity.ok(service.paging(page, size));
     }
 
     @DeleteMapping(value = "")

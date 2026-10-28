@@ -3,7 +3,9 @@ package kunuz.uz.api.service;
 import kunuz.uz.api.dto.request.articleType.ArticleTypeRequestDTO;
 import kunuz.uz.api.dto.request.articleType.filter.ArticleTypeFilterDTO;
 import kunuz.uz.api.dto.response.articleType.ArticleTypeResponseDTO;
+import kunuz.uz.api.dto.response.profile.ProfileResponseDTO;
 import kunuz.uz.api.entity.ArticleTypeEntity;
+import kunuz.uz.api.entity.ProfileEntity;
 import kunuz.uz.api.enums.Language;
 import kunuz.uz.api.exceptions.articleType.ArticleTypeNotFoundException;
 import kunuz.uz.api.mapper.articleType.ArticleTypeShort;
@@ -69,6 +71,17 @@ public class ArticleTypeService {
                 .shortToResponseDtoList(
                         entities.getContent()
                 ),
+                entities.getPageable(),
+                entities.getTotalElements());
+    }
+
+    public Page<ArticleTypeResponseDTO> paging(int page, int size) {
+        PaginationUtil.check(page, size);
+        page--;
+        PageRequest request = PageRequest.of(page,size, Sort.by("createdDate").descending());
+        Page<ArticleTypeEntity> entities = repository.findAll(request);
+        return new PageImpl<>(util
+                .toResponseDtoList(entities.getContent()),
                 entities.getPageable(),
                 entities.getTotalElements());
     }

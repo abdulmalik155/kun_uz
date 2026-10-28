@@ -36,6 +36,12 @@ public class ArticleTypeController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
+    @GetMapping(value = "/paging")
+    public ResponseEntity<Page<ArticleTypeResponseDTO>> paging (@RequestParam(value = "page", defaultValue = "1") int page,
+                                                                @RequestParam(value = "size", defaultValue = "10") int size){
+        return ResponseEntity.ok(service.paging(page,size));
+    }
+
     @PostMapping(value = "/filter")
     public ResponseEntity<Page<ArticleTypeResponseDTO>> filter (@RequestParam(value = "page", defaultValue = "1") int page,
                                                                 @RequestParam(value = "size", defaultValue = "10") int size,
