@@ -1,6 +1,7 @@
 package kunuz.uz.api.service;
 
 import kunuz.uz.api.dto.request.articleType.ArticleTypeRequestDTO;
+import kunuz.uz.api.dto.request.articleType.filter.ArticleTypeFilterDTO;
 import kunuz.uz.api.dto.response.articleType.ArticleTypeResponseDTO;
 import kunuz.uz.api.entity.ArticleTypeEntity;
 import kunuz.uz.api.enums.Language;
@@ -50,11 +51,10 @@ public class ArticleTypeService {
         repository.deleteById(id);
     }
 
-    public Page<ArticleTypeResponseDTO> paging(int page, int size) {
+    public Page<ArticleTypeResponseDTO> filter(int page, int size, ArticleTypeFilterDTO dto) {
         PaginationUtil.check(page, size);
         page--;
-        PageRequest request = PageRequest.of(page, size, Sort.by("createdDate").descending());
-        Page<ArticleTypeEntity> entities = repository.findAll(request);
+        Page<ArticleTypeEntity> entities = customRepository.filter(page,size, dto);
         return new PageImpl<>(util.toResponseDtoList(entities.getContent()), entities.getPageable(), entities.getTotalElements());
     }
 

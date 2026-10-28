@@ -52,8 +52,9 @@ public class ProfileCustomRepository {
             params.put("createdDateTo", dto.getCreatedDateTo());
         }
 
-        selectQueryBuilder.append(queryBuilder);
         countQueryBuilder.append(queryBuilder);
+        queryBuilder.append(" order by p.name asc, p.createdDate desc");
+        selectQueryBuilder.append(queryBuilder);
 
         Query selectQuery = entityManager.createQuery(selectQueryBuilder.toString());
         selectQuery.setFirstResult(page*size);

@@ -32,7 +32,7 @@ public class ProfileController {
         return ResponseEntity.ok(service.update(id, dto));
     }
 
-    @PutMapping(value = "/update")
+    @PutMapping(value = "/updateForAnyUser")
     public ResponseEntity<ProfileResponseDTO> updateDetail(@RequestParam(value = "profileId") Long id, @Valid @RequestBody BaseProfileDTO dto){
         return ResponseEntity.ok(service.updateWithDetail(id, dto));
     }

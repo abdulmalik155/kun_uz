@@ -1,6 +1,7 @@
 package kunuz.uz.api.controller;
 
 import kunuz.uz.api.dto.request.articleType.ArticleTypeRequestDTO;
+import kunuz.uz.api.dto.request.articleType.filter.ArticleTypeFilterDTO;
 import kunuz.uz.api.dto.response.articleType.ArticleTypeResponseDTO;
 import kunuz.uz.api.enums.Language;
 import kunuz.uz.api.mapper.articleType.ArticleTypeShort;
@@ -35,10 +36,11 @@ public class ArticleTypeController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
-    @GetMapping(value = "")
-    public ResponseEntity<Page<ArticleTypeResponseDTO>> paging (@RequestParam(value = "page", defaultValue = "1") int page,
-                                                                @RequestParam(value = "size", defaultValue = "10") int size){
-        return ResponseEntity.ok(service.paging(page,size));
+    @PostMapping(value = "/filter")
+    public ResponseEntity<Page<ArticleTypeResponseDTO>> filter (@RequestParam(value = "page", defaultValue = "1") int page,
+                                                                @RequestParam(value = "size", defaultValue = "10") int size,
+                                                                @RequestBody ArticleTypeFilterDTO dto){
+        return ResponseEntity.ok(service.filter(page,size,dto));
     }
 
     @GetMapping(value = "/getByLanguage")

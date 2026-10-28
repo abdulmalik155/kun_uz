@@ -24,7 +24,7 @@ public class RegionCustomRepository {
     @Autowired
     private EntityManager entityManager;
 
-    public Page<RegionEntity> findAll(int page, int size, RegionFilterDTO dto) {
+    public Page<RegionEntity> filter(int page, int size, RegionFilterDTO dto) {
         StringBuilder selectBuilder = new StringBuilder("select r from RegionEntity r");
         StringBuilder countBuilder = new StringBuilder("select count(r) from RegionEntity r");
         StringBuilder queryBuilder = new StringBuilder(" where r.visible = true");

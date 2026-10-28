@@ -60,10 +60,10 @@ public class RegionService {
         repository.deleteById(id);
     }
 
-    public Page<RegionResponseDTO> getRegionList(int page, int size, RegionFilterDTO dto) {
+    public Page<RegionResponseDTO> filteredList(int page, int size, RegionFilterDTO dto) {
         PaginationUtil.check(page,size);
         page--;
-        Page<RegionEntity> entities = customRepository.findAll(page,size,dto);
+        Page<RegionEntity> entities = customRepository.filter(page,size,dto);
         List<RegionResponseDTO> responseDTOList = util.toResponseDtoList(entities.getContent());
         return new PageImpl<>(responseDTOList, entities.getPageable(), entities.getTotalElements());
     }

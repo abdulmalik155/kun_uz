@@ -38,11 +38,11 @@ public class RegionController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
-    @PostMapping(value = "/paging")
-    public ResponseEntity<Page<RegionResponseDTO>> getRegionList(@RequestParam(value = "page", defaultValue = "1") int page,
+    @PostMapping(value = "/filter")
+    public ResponseEntity<Page<RegionResponseDTO>> filteredList(@RequestParam(value = "page", defaultValue = "1") int page,
                                                            @RequestParam(value = "size", defaultValue = "10") int size,
                                                            @RequestBody RegionFilterDTO dto){
-        return ResponseEntity.ok(service.getRegionList(page,size,dto));
+        return ResponseEntity.ok(service.filteredList(page,size,dto));
     }
 
     @GetMapping(value = "/getByLanguage")
