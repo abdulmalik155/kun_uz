@@ -11,11 +11,13 @@ import java.util.LinkedList;
 import java.util.List;
 
 @Component
-public class RegionUtil implements EntityUpdate<BaseRegionDTO, RegionRequestDTO, RegionResponseDTO, RegionEntity>, MappingFromArray<RegionShort> {
+public class RegionUtil implements BaseEntityUtil<BaseRegionDTO, RegionResponseDTO, RegionEntity>, MappingFromArray<RegionShort> {
 
     @Override
-    public RegionEntity toEntity(RegionRequestDTO dto, RegionEntity entity) {
-        entity.setOrderNumber(dto.getOrderNumber());
+    public RegionEntity toEntity(BaseRegionDTO dto, RegionEntity entity) {
+        if(dto.getClass().equals(RegionRequestDTO.class)){
+            entity.setOrderNumber(((RegionRequestDTO) dto).getOrderNumber());
+        }
         entity.setNameUz(dto.getNameUz());
         entity.setNameRu(dto.getNameRu());
         entity.setNameEn(dto.getNameEn());
@@ -25,13 +27,13 @@ public class RegionUtil implements EntityUpdate<BaseRegionDTO, RegionRequestDTO,
         return entity;
     }
 
-    @Override
-    public RegionEntity toEntityForUpdate(BaseRegionDTO dto, RegionEntity entity) {
-        entity.setNameUz(dto.getNameUz());
-        entity.setNameRu(dto.getNameRu());
-        entity.setNameEn(dto.getNameEn());
-        return entity;
-    }
+//    @Override
+//    public RegionEntity toEntityForUpdate(BaseRegionDTO dto, RegionEntity entity) {
+//        entity.setNameUz(dto.getNameUz());
+//        entity.setNameRu(dto.getNameRu());
+//        entity.setNameEn(dto.getNameEn());
+//        return entity;
+//    }
 
     @Override
     public RegionResponseDTO toResponseDto(RegionEntity entity) {

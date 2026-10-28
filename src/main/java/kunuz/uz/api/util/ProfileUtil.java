@@ -12,9 +12,9 @@ import java.util.LinkedList;
 import java.util.List;
 
 @Component
-public class ProfileUtil implements EntityUpdate<BaseProfileDTO, ProfileRequestDTO, ProfileResponseDTO, ProfileEntity> {
+public class ProfileUtil implements BaseEntityUtil<BaseProfileDTO, ProfileResponseDTO, ProfileEntity> {
 
-    public ProfileEntity toEntity(ProfileRequestDTO dto, ProfileEntity entity) {
+    public ProfileEntity toEntity(BaseProfileDTO dto, ProfileEntity entity) {
         entity.setName(dto.getName().trim());
         if (dto.getSurname() != null && !dto.getSurname().isBlank()) {
             entity.setSurname(dto.getSurname());
@@ -28,30 +28,18 @@ public class ProfileUtil implements EntityUpdate<BaseProfileDTO, ProfileRequestD
             entity.setStatus(ProfileStatus.ACTIVE);
             entity.setVisible(true);
         }
-        entity.setRole(dto.getRole());
+        if (dto.getClass().equals(ProfileRequestDTO.class) && ((ProfileRequestDTO) dto).getRole() != null) {
+            entity.setRole(((ProfileRequestDTO) (dto)).getRole());
+        }
         return entity;
     }
-
-    public ProfileEntity toEntityForUpdate(BaseProfileDTO dto, ProfileEntity entity) {
-        entity.setName(dto.getName().trim());
-        if (dto.getSurname() != null && !dto.getSurname().isBlank()) {
-            entity.setSurname(dto.getSurname());
-        }
-        if (dto.getEmail() != null) {
-            entity.setEmail(dto.getEmail());
-        }
-        entity.setPhone(dto.getPhone().trim());
-        entity.setPassword(dto.getPassword().trim());
-        return entity;
-    }
-
 
     public void check(ProfileRequestDTO dto) {
         /*if (dto.getSurname() != null && dto.getSurname().trim().length() < 3) {
             throw new IllegalArgumentException("Invalid surname. Surname can not be empty");
         }*/
         if (dto.getRole() != null && (dto.getRole().equals(ProfileRole.ROLE_USER) || dto.getRole().equals(ProfileRole.ROLE_ADMIN))) {
-            throw new IllegalArgumentException("Admin can not work with another admin or user, only (moderator or publisher)");
+            throw new IllegalArgumentException("Admin can not do operations on another admin or user, only (moderator or publisher)");
         }
     }
 

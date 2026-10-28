@@ -44,7 +44,7 @@ public class RegionService {
 
     public RegionResponseDTO updateById(Integer id, BaseRegionDTO dto) {
         RegionEntity entityToUpdate =  getEntityOrThrow(id);
-        entityToUpdate = util.toEntityForUpdate(dto, entityToUpdate);
+        entityToUpdate = util.toEntity(dto, entityToUpdate);
         RegionEntity updated = repository.save(entityToUpdate);
         RegionResponseDTO responseDTO = util.toResponseDto(updated);
         return responseDTO;
@@ -57,7 +57,10 @@ public class RegionService {
     }
 
     public void deleteById(Integer id) {
-        repository.deleteById(id);
+//        repository.deleteById(id);
+        RegionEntity existingEntity = getEntityOrThrow(id);
+        existingEntity.setVisible(false);
+        repository.save(existingEntity);
     }
 
     public Page<RegionResponseDTO> filter(int page, int size, RegionFilterDTO dto) {

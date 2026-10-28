@@ -34,21 +34,28 @@ public class ProfileService {
         util.check(dto);
         ProfileEntity entity = util.toEntity(dto, new ProfileEntity());
         repository.save(entity);
-        return util.toResponseDto(entity);
+        ProfileResponseDTO responseDTO = util.toResponseDto(entity);
+        return responseDTO;
     }
 
-    public ProfileResponseDTO update(Long id, ProfileRequestDTO dto) {
+    public ProfileResponseDTO updateForAdmin(Long id, ProfileRequestDTO dto) {
         util.check(dto);
-        ProfileEntity updatedEntity = repository.save(util.toEntity(dto, getEntityOrThrow(id)));
-        return util.toResponseDto(updatedEntity);
+        return update(id, dto);
     }
 
-    public ProfileResponseDTO updateWithDetail(Long id, @Valid BaseProfileDTO dto) {
-        ProfileEntity updatedEntity = repository.save(util.toEntityForUpdate(dto, getEntityOrThrow(id)));
-        return util.toResponseDto(updatedEntity);
+    private ProfileResponseDTO update(Long id, BaseProfileDTO dto){
+        ProfileEntity entityToUpdate = getEntityOrThrow(id);
+        entityToUpdate = util.toEntity(dto, entityToUpdate);
+        ProfileEntity updatedEntity = repository.save(entityToUpdate);
+        ProfileResponseDTO responseDTO = util.toResponseDto(updatedEntity);
+        return responseDTO;
     }
 
-    private ProfileEntity getEntityOrThrow(Long id){
+    public ProfileResponseDTO updateWithDetail(Long id, BaseProfileDTO dto) {
+        return update(id, dto);
+    }
+
+    private ProfileEntity getEntityOrThrow(Long id) {
         return repository.findById(id)
                 .orElseThrow(() -> new ProfileNotFoundException(String.format("There is no profile with such id %s", id)));
     }
@@ -56,19 +63,22 @@ public class ProfileService {
     public Page<ProfileResponseDTO> paging(int page, int size) {
         PaginationUtil.check(page, size);
         page--;
-        PageRequest request = PageRequest.of(page,size, Sort.by("createdDate").descending());
+        PageRequest request = PageRequest.of(page, size, Sort.by("createdDate").descending());
         Page<ProfileEntity> entities = repository.findAll(request);
         return new PageImpl<>(util.toResponseDtoList(entities.getContent()), entities.getPageable(), entities.getTotalElements());
     }
 
     public void deleteById(Long id) {
-        repository.deleteById(id);
+//        repository.deleteById(id);
+        ProfileEntity existingEntity = getEntityOrThrow(id);
+        existingEntity.setVisible(false);
+        repository.save(existingEntity);
     }
 
     public Page<ProfileResponseDTO> filter(int page, int size, ProfileFilterDTO dto) {
-        PaginationUtil.check(page,size);
+        PaginationUtil.check(page, size);
         page--;
-        Page<ProfileEntity> entities = customRepository.filter(page,size,dto);
+        Page<ProfileEntity> entities = customRepository.filter(page, size, dto);
         return new PageImpl<>(util.toResponseDtoList(entities.getContent()), entities.getPageable(), entities.getTotalElements());
     }
 }

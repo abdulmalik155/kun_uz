@@ -12,18 +12,18 @@ import java.util.List;
 @Component
 public class ArticleTypeUtil implements BaseEntityUtil<ArticleTypeRequestDTO, ArticleTypeResponseDTO, ArticleTypeEntity>, MappingFromArray<ArticleTypeShort> {
 
-    public ArticleTypeEntity toEntity(ArticleTypeRequestDTO dto, ArticleTypeEntity entity){
+    public ArticleTypeEntity toEntity(ArticleTypeRequestDTO dto, ArticleTypeEntity entity) {
         entity.setOrderNumber(dto.getOrderNumber());
         entity.setNameUz(dto.getNameUz());
         entity.setNameRu(dto.getNameRu());
         entity.setNameEn(dto.getNameEn());
-        if(entity.getId() == null){
+        if (entity.getId() == null) {
             entity.setVisible(true);
         }
         return entity;
     }
 
-    public ArticleTypeResponseDTO toResponseDto(ArticleTypeEntity entity){
+    public ArticleTypeResponseDTO toResponseDto(ArticleTypeEntity entity) {
         ArticleTypeResponseDTO dto = new ArticleTypeResponseDTO();
         dto.setId(entity.getId());
         dto.setNameUz(entity.getNameUz());
@@ -35,7 +35,7 @@ public class ArticleTypeUtil implements BaseEntityUtil<ArticleTypeRequestDTO, Ar
     }
 
 
-    public List<ArticleTypeResponseDTO> toResponseDtoList(Iterable<ArticleTypeEntity> iterable){
+    public List<ArticleTypeResponseDTO> toResponseDtoList(Iterable<ArticleTypeEntity> iterable) {
         List<ArticleTypeResponseDTO> list = new LinkedList<>();
         for (ArticleTypeEntity articleTypeEntity : iterable) {
             list.add(toResponseDto(articleTypeEntity));

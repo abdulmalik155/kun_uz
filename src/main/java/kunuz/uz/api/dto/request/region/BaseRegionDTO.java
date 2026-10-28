@@ -7,17 +7,17 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class BaseRegionDTO {
+public abstract class BaseRegionDTO {
 
-    @NotBlank(message = "Uzbek translation of article is required")
-    @Size(min = 3, max = 255, message = "Minimum character length for article name is 3")
+    @NotBlank(message = "Uzbek translation of region is required")
+    @Size(min = 3, max = 255, message = "Minimum character length for region name is 3")
     private String nameUz;
 
-    @NotBlank(message = "Russian translation of article is required")
-    @Size(min = 3, max = 255, message = "Minimum character length for article name is 3")
+    @NotBlank(message = "Russian translation of region is required")
+    @Size(min = 3, max = 255, message = "Minimum character length for region name is 3")
     private String nameRu;
 
-    @NotBlank(message = "English translation of article is required")
-    @Size(min = 3, max = 255, message = "Minimum character length for article name is 3")
+    @NotBlank(message = "English translation of region is required")
+    @Size(min = 3, max = 255, message = "Minimum character length for region name is 3")
     private String nameEn;
 }

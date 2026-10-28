@@ -9,7 +9,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class BaseProfileDTO {
+public abstract class BaseProfileDTO {
     @NotBlank(message = "Name is required")
     @Size(min = 3, max = 255, message = "Minimum length of name is 3")
     private String name;

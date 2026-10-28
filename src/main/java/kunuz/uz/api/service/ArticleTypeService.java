@@ -3,9 +3,7 @@ package kunuz.uz.api.service;
 import kunuz.uz.api.dto.request.articleType.ArticleTypeRequestDTO;
 import kunuz.uz.api.dto.request.articleType.filter.ArticleTypeFilterDTO;
 import kunuz.uz.api.dto.response.articleType.ArticleTypeResponseDTO;
-import kunuz.uz.api.dto.response.profile.ProfileResponseDTO;
 import kunuz.uz.api.entity.ArticleTypeEntity;
-import kunuz.uz.api.entity.ProfileEntity;
 import kunuz.uz.api.enums.Language;
 import kunuz.uz.api.exceptions.articleType.ArticleTypeNotFoundException;
 import kunuz.uz.api.mapper.articleType.ArticleTypeShort;
@@ -32,7 +30,6 @@ public class ArticleTypeService {
     @Autowired
     private ArticleTypeUtil util;
 
-
     public ArticleTypeResponseDTO create(ArticleTypeRequestDTO dto) {
         ArticleTypeEntity entity = repository.save(util.toEntity(dto, new ArticleTypeEntity()));
         return util.toResponseDto(entity);
@@ -50,22 +47,25 @@ public class ArticleTypeService {
     }
 
     public void deleteById(Integer id) {
-        repository.deleteById(id);
+//        repository.deleteById(id);
+        ArticleTypeEntity existingEntity = getEntityOrThrow(id);
+        existingEntity.setVisible(false);
+        repository.save(existingEntity);
     }
 
     public Page<ArticleTypeResponseDTO> filter(int page, int size, ArticleTypeFilterDTO dto) {
         PaginationUtil.check(page, size);
         page--;
-        Page<ArticleTypeEntity> entities = customRepository.filter(page,size, dto);
+        Page<ArticleTypeEntity> entities = customRepository.filter(page, size, dto);
         return new PageImpl<>(util.toResponseDtoList(entities.getContent()), entities.getPageable(), entities.getTotalElements());
     }
 
     public Page<ArticleTypeShort> getByLanguage(int page, int size, Language language) {
         PaginationUtil.check(page, size);
         page--;
-        if (language == null ) throw new IllegalArgumentException("Language of name of article can not be empty");
+        if (language == null) throw new IllegalArgumentException("Language of name of article can not be empty");
 
-        Page<Object[]> entities = customRepository.getByLanguage(page,size,language);
+        Page<Object[]> entities = customRepository.getByLanguage(page, size, language);
 
         return new PageImpl<>(util
                 .shortToResponseDtoList(
@@ -78,7 +78,7 @@ public class ArticleTypeService {
     public Page<ArticleTypeResponseDTO> paging(int page, int size) {
         PaginationUtil.check(page, size);
         page--;
-        PageRequest request = PageRequest.of(page,size, Sort.by("createdDate").descending());
+        PageRequest request = PageRequest.of(page, size, Sort.by("createdDate").descending());
         Page<ArticleTypeEntity> entities = repository.findAll(request);
         return new PageImpl<>(util
                 .toResponseDtoList(entities.getContent()),

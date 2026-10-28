@@ -2,11 +2,11 @@ package kunuz.uz.api.util;
 
 import java.util.List;
 
-public interface BaseEntityUtil<Request, Response, Entity> {
+public interface BaseEntityUtil<RequestDTO, ResponseDTO, Entity> {
 
-    Entity toEntity(Request dto, Entity entity);
+    Entity toEntity(RequestDTO dto, Entity entity);
 
-    Response toResponseDto(Entity entity);
+    ResponseDTO toResponseDto(Entity entity);
 
-    List<Response> toResponseDtoList(Iterable<Entity> iterable);
+    List<ResponseDTO> toResponseDtoList(Iterable<Entity> iterable);
 }

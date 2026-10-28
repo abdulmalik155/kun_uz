@@ -8,8 +8,6 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 public class RegionResponseDTO {
-    //  (id,key,name_uz, name_ru, name_en,visible,created_date)
-
     private Integer id;
     private String nameUz;
     private String nameRu;

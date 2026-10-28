@@ -12,4 +12,6 @@ public class ProfileRequestDTO extends BaseProfileDTO {
 
     @NotNull(message = "Profile role is required")
     private ProfileRole role;
+
+    private Boolean visible;
 }

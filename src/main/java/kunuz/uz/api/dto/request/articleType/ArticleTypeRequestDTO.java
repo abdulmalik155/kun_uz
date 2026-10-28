@@ -9,22 +9,21 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ArticleTypeRequestDTO {
+public class ArticleTypeRequestDTO{
+
+    @NotBlank(message = "Uzbek translation of article type is required")
+    @Size(min = 3, max = 255, message = "Minimum character length for article type name is 3")
+    private String nameUz;
+
+    @NotBlank(message = "Russian translation of article type is required")
+    @Size(min = 3, max = 255, message = "Minimum character length for article type name is 3")
+    private String nameRu;
+
+    @NotBlank(message = "English translation of article type is required")
+    @Size(min = 3, max = 255, message = "Minimum character length for article type name is 3")
+    private String nameEn;
 
     @NotNull(message = "Order number is required")
     @Min(value = 0, message = "Minimum value for order is 0")
     private Integer orderNumber;
-
-    @NotBlank(message = "Uzbek translation of article is required")
-    @Size(min = 3, max = 255, message = "Minimum character length for article name is 3")
-    private String nameUz;
-
-    @NotBlank(message = "Russian translation of article is required")
-    @Size(min = 3, max = 255, message = "Minimum character length for article name is 3")
-    private String nameRu;
-
-    @NotBlank(message = "English translation of article is required")
-    @Size(min = 3, max = 255, message = "Minimum character length for article name is 3")
-    private String nameEn;
-
 }
