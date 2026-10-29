@@ -1,11 +1,9 @@
 package kunuz.uz.api.mapper.region;
 
-import lombok.Getter;
-import lombok.Setter;
+public interface RegionShort {
+    Integer getId();
 
-@Getter
-@Setter
-public class RegionShort {
-    private Integer id;
-    private String name;
+    String getKey();
+
+    String getName();
 }

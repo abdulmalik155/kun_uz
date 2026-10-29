@@ -22,19 +22,19 @@ public class CategoryEntity {
     @Column(name = "order_number", nullable = false, unique = true)
     private Integer orderNumber;
 
-    @Column(name = "name_uz", nullable = false, unique = true, columnDefinition = "varchar(255) default 'placeholder uzbek'")
+    @Column(name = "name_uz", nullable = false, unique = true, columnDefinition = "varchar(255) default 'Kategoriya'")
     private String nameUz;
 
-    @Column(name = "name_ru", nullable = false, unique = true, columnDefinition = "varchar(255) default 'placeholder russian'")
+    @Column(name = "name_ru", nullable = false, unique = true, columnDefinition = "varchar(255) default 'Категория'")
     private String nameRu;
 
-    @Column(name = "name_en", nullable = false, unique = true, columnDefinition = "varchar(255) default 'placeholder english'")
+    @Column(name = "name_en", nullable = false, unique = true, columnDefinition = "varchar(255) default 'Category'")
     private String nameEn;
 
     @Column(name = "visible", nullable = false, columnDefinition = "boolean default true")
     private Boolean visible;
 
-    @Column(name = "key", unique = true, nullable = false, columnDefinition = "varchar(255) default 'Category'")
+    @Column(name = "key", unique = true, nullable = false, columnDefinition = "varchar(255) default 'category'")
     private String key;
 
     @CreationTimestamp

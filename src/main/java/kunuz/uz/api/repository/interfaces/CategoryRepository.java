@@ -40,7 +40,7 @@ public interface CategoryRepository extends CrudRepository<CategoryEntity, Integ
     @Modifying
     @Transactional
     @Query(value = "UPDATE CategoryEntity c " +
-            "SET c.visible = false " +
+            "SET c.visible = FALSE " +
             "WHERE c.id = ?1")
     void updateVisibleById(Integer id);
 

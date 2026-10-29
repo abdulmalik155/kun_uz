@@ -21,19 +21,19 @@ public class RegionEntity {
     @Column(name = "order_number", nullable = false, unique = true)
     private Integer orderNumber;
 
-    @Column(name = "name_uz", nullable = false, unique = true,columnDefinition = "varchar(255) default 'placeholder uzbek'")
+    @Column(name = "name_uz", nullable = false, unique = true,columnDefinition = "varchar(255) default 'Viloyat'")
     private String nameUz;
 
-    @Column(name = "name_ru", nullable = false, unique = true, columnDefinition = "varchar(255) default 'placeholder russian'")
+    @Column(name = "name_ru", nullable = false, unique = true, columnDefinition = "varchar(255) default 'Регион'")
     private String nameRu;
 
-    @Column(name = "name_en", nullable = false, unique = true, columnDefinition = "varchar(255) default 'placeholder english'")
+    @Column(name = "name_en", nullable = false, unique = true, columnDefinition = "varchar(255) default 'Region'")
     private String nameEn;
 
     @Column(name = "visible", nullable = false, columnDefinition = "boolean default true")
     private Boolean visible;
 
-    @Column(name = "key", unique = true, nullable = false, columnDefinition = "varchar(255) default 'Region'")
+    @Column(name = "key", unique = true, nullable = false, columnDefinition = "varchar(255) default 'region'")
     private String key;
 
 

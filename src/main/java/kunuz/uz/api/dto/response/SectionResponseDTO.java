@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-public class ArticleTypeResponseDTO {
+public class SectionResponseDTO {
     private Integer id;
     private Integer orderNumber;
     private String nameUz;

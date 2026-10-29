@@ -4,7 +4,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(value = "/api/article")
+@RequestMapping(value = "/api/v1/article")
 public class ArticleController {
     //6. Article∂
     //    1. CREATE (Moderator) status(NotPublished)

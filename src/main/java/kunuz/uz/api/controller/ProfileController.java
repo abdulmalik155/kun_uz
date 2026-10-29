@@ -13,7 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(value = "/api/profile")
+@RequestMapping(value = "/api/v1/profile")
 public class ProfileController {
 //. Profile
 //    1. Create profile (ADMIN) (can create MODERATOR,PUBLISHER))

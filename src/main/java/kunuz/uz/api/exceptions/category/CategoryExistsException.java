@@ -1,4 +1,4 @@
-package kunuz.uz.api.exceptions;
+package kunuz.uz.api.exceptions.category;
 
 public class CategoryExistsException extends IllegalArgumentException {
     public CategoryExistsException(String categoryExists) {

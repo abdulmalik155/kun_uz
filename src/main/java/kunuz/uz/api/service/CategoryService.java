@@ -4,17 +4,15 @@ import kunuz.uz.api.dto.request.CategoryRequestDTO;
 import kunuz.uz.api.dto.response.CategoryResponseDTO;
 import kunuz.uz.api.entity.CategoryEntity;
 import kunuz.uz.api.enums.Language;
-import kunuz.uz.api.exceptions.CategoryExistsException;
-import kunuz.uz.api.exceptions.CategoryNotFoundException;
+import kunuz.uz.api.exceptions.category.CategoryExistsException;
+import kunuz.uz.api.exceptions.category.CategoryNotFoundException;
 import kunuz.uz.api.mapper.category.CategoryShort;
-import kunuz.uz.api.repository.custom.classes.CategoryCustomRepository;
 import kunuz.uz.api.repository.interfaces.CategoryRepository;
 import kunuz.uz.api.util.CategoryUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 
 @Service
@@ -22,9 +20,6 @@ public class CategoryService {
 
     @Autowired
     private CategoryRepository repository;
-
-    @Autowired
-    private CategoryCustomRepository customRepository;
 
     @Autowired
     private CategoryUtil util;
@@ -57,7 +52,7 @@ public class CategoryService {
         if (language == null) {
             throw new IllegalArgumentException("Language of name of category can not be empty");
         }
-        List<CategoryShort> entities = repository.allByLanguage(language.toString().toUpperCase());
+        List<CategoryShort> entities = repository.allByLanguage(language.toString());
         return entities;
     }
 

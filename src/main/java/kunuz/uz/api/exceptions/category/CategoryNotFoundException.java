@@ -1,4 +1,4 @@
-package kunuz.uz.api.exceptions;
+package kunuz.uz.api.exceptions.category;
 
 public class CategoryNotFoundException extends IllegalArgumentException{
     public CategoryNotFoundException(String s) {

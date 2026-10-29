@@ -1,8 +1,6 @@
 package kunuz.uz.api.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CurrentTimestamp;
@@ -65,11 +63,11 @@ public class ArticleEntity {
     @Column(name = "count")
     private Long count;
 
-    @Column(name = "article_type_id")
-    private Integer articleTypeId;
+    @Column(name = "section_id")
+    private Integer sectionId;
 
-    @JoinColumn(name = "article_type_id",insertable = false,updatable = false,nullable = false)
+    @JoinColumn(name = "section_id", insertable = false,updatable = false,nullable = false)
     @ManyToOne
-    private ArticleTypeEntity articleType;
+    private SectionEntity section;
 
 }

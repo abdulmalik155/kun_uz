@@ -14,13 +14,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "/api/category")
+@RequestMapping(value = "/api/v1/category")
 public class CategoryController {
-
 
     @Autowired
     private CategoryService service;
-
 
     @PostMapping(value = "")
     public ResponseEntity<CategoryResponseDTO> create(@Valid @RequestBody CategoryRequestDTO dto){

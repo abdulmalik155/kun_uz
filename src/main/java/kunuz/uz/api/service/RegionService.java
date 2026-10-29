@@ -1,25 +1,19 @@
 package kunuz.uz.api.service;
 
-import kunuz.uz.api.dto.request.BaseRegionDTO;
 import kunuz.uz.api.dto.request.RegionRequestDTO;
-import kunuz.uz.api.dto.request.RegionFilterDTO;
 import kunuz.uz.api.dto.response.RegionResponseDTO;
 import kunuz.uz.api.entity.RegionEntity;
 import kunuz.uz.api.enums.Language;
+import kunuz.uz.api.exceptions.region.RegionExistsException;
 import kunuz.uz.api.exceptions.region.RegionNotFoundException;
 import kunuz.uz.api.mapper.region.RegionShort;
-import kunuz.uz.api.repository.custom.classes.RegionCustomRepository;
 import kunuz.uz.api.repository.interfaces.RegionRepository;
-import kunuz.uz.api.util.PaginationUtil;
 import kunuz.uz.api.util.RegionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class RegionService {
@@ -28,72 +22,67 @@ public class RegionService {
     private RegionRepository repository;
 
     @Autowired
-    private RegionCustomRepository customRepository;
-
-    @Autowired
     private RegionUtil util;
 
-    public RegionResponseDTO create(RegionRequestDTO dto) {
-        RegionEntity entity = util.toEntity(dto, new RegionEntity());
+    public RegionResponseDTO create(RegionRequestDTO newDto) {
+        checkKeyAndOrder(newDto);
+        RegionEntity entity = util.toEntity(newDto, new RegionEntity());
+        entity.setVisible(true);
         RegionEntity saved = repository.save(entity);
         RegionResponseDTO responseDTO = util.toDto(saved);
         return responseDTO;
     }
 
-    public RegionResponseDTO update(Integer id, BaseRegionDTO dto) {
-        RegionEntity entityToUpdate =  getEntityOrThrow(id);
-        entityToUpdate = util.toEntity(dto, entityToUpdate);
+    public RegionResponseDTO update(Integer id, RegionRequestDTO dto) {
+        checkKeyAndOrder(id, dto);
+        RegionEntity entityToUpdate = util.toEntity(dto, getEntityOrThrow(id));
         RegionEntity updated = repository.save(entityToUpdate);
         RegionResponseDTO responseDTO = util.toDto(updated);
         return responseDTO;
     }
 
-    private RegionEntity getEntityOrThrow(Integer id){
+    public void delete(Integer id) {
+        repository.updateVisibleById(id);
+    }
+
+    public List<RegionResponseDTO> all() {
+        List<RegionEntity> entities = repository.allSortedByCreatedDate();
+        return util.toDtoList(entities);
+    }
+
+    public List<RegionShort> getByLanguage(Language language) {
+        if (language == null) {
+            throw new IllegalArgumentException("Language of name of region is required");
+        }
+        List<RegionShort> entities = repository.getByLanguage(language.toString());
+        return entities;
+    }
+
+    private RegionEntity getEntityOrThrow(Integer id) {
         return repository.findById(id)
                 .orElseThrow(
-                        ()-> new RegionNotFoundException(String.format("Region with given %s id doesn't exist", id)));
+                        () -> new RegionNotFoundException(String.format("Region with given %s id doesn't exist", id)));
     }
 
-    public void delete(Integer id) {
-//        repository.deleteById(id);
-        RegionEntity existingEntity = getEntityOrThrow(id);
-        existingEntity.setVisible(false);
-        repository.save(existingEntity);
+    private void checkKeyAndOrder(RegionRequestDTO newDto) {
+        Optional<RegionEntity> optionalKey = repository.findByKey(newDto.getKey());
+        if (optionalKey.isPresent()) {
+            throw new RegionExistsException("Region exists");
+        }
+        Optional<RegionEntity> optionalOrder = repository.findByOrderNumber(newDto.getOrderNumber());
+        if (optionalOrder.isPresent()) {
+            throw new IllegalArgumentException("This position is taken");
+        }
     }
 
-    public Page<RegionResponseDTO> regionList(int page, int size, RegionFilterDTO dto) {
-        PaginationUtil.check(page,size);
-        page--;
-        Page<RegionEntity> entities = customRepository.filter(page,size,dto);
-        List<RegionResponseDTO> responseDTOList = util.toDtoList(entities.getContent());
-        return new PageImpl<>(responseDTOList, entities.getPageable(), entities.getTotalElements());
-    }
-
-    public Page<RegionShort> getByLanguage(int page, int size, Language language) {
-//        PaginationUtil.check(page, size);
-//        page--;
-//        if (language == null ) throw new IllegalArgumentException("Language of name of region can not be empty");
-//
-//        Page<Object[]> entities = customRepository.getByLanguage(page,size,language);
-//
-//        return new PageImpl<>(util
-//                .shortToResponseDtoList(
-//                        entities.getContent()
-//                ),
-//                entities.getPageable(),
-//                entities.getTotalElements());
-        return null;
-    }
-
-
-    public Page<RegionResponseDTO> paging(int page, int size) {
-        PaginationUtil.check(page, size);
-        page--;
-        PageRequest request = PageRequest.of(page,size, Sort.by("createdDate").descending());
-        Page<RegionEntity> entities = repository.findAll(request);
-        return new PageImpl<>(util
-                .toDtoList(entities.getContent()),
-                entities.getPageable(),
-                entities.getTotalElements());
+    private void checkKeyAndOrder(Integer id, RegionRequestDTO newDto) {
+        Optional<RegionEntity> optionalKey = repository.findByKey(newDto.getKey());
+        if (optionalKey.isPresent() && !optionalKey.get().getId().equals(id)) {
+            throw new RegionExistsException("Region exists");
+        }
+        Optional<RegionEntity> optionalOrder = repository.findByOrderNumber(newDto.getOrderNumber());
+        if (optionalOrder.isPresent() && !optionalOrder.get().getId().equals(id)) {
+            throw new IllegalArgumentException("This position is taken");
+        }
     }
 }

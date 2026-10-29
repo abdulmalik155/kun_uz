@@ -8,7 +8,6 @@ import lombok.Setter;
 @Setter
 public class ProfileUpdateDTO extends ProfileRequestDTO {
 
-    private Boolean visible;
 
     private ProfileStatus status;
 }
