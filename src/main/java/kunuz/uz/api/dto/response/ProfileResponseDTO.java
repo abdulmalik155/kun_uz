@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -13,7 +14,7 @@ public class ProfileResponseDTO {
     private Long id;
     private String name;
     private String surname;
-    private String phone;
-    private ProfileRole role;
+    private String username;
+    private List<ProfileRole> roleList;
     private LocalDateTime createdDate;
 }

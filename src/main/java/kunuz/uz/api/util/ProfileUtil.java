@@ -1,10 +1,8 @@
 package kunuz.uz.api.util;
 
-import kunuz.uz.api.dto.request.BaseProfileDTO;
 import kunuz.uz.api.dto.request.ProfileRequestDTO;
 import kunuz.uz.api.dto.response.ProfileResponseDTO;
 import kunuz.uz.api.entity.ProfileEntity;
-import kunuz.uz.api.enums.ProfileRole;
 import kunuz.uz.api.enums.ProfileStatus;
 import org.springframework.stereotype.Component;
 
@@ -12,22 +10,17 @@ import java.util.LinkedList;
 import java.util.List;
 
 @Component
-public class ProfileUtil implements BaseEntityUtil<BaseProfileDTO, ProfileResponseDTO, ProfileEntity> {
+public class ProfileUtil implements BaseEntityUtil<ProfileRequestDTO, ProfileResponseDTO, ProfileEntity> {
 
-    public ProfileEntity toEntity(BaseProfileDTO dto, ProfileEntity entity) {
+    public ProfileEntity toEntity(ProfileRequestDTO dto, ProfileEntity entity) {
         entity.setName(dto.getName().trim());
         if (dto.getSurname() != null && !dto.getSurname().isBlank()) {
             entity.setSurname(dto.getSurname());
         }
-        if (dto.getEmail() != null) {
-            entity.setEmail(dto.getEmail());
-        }
-        entity.setPhone(dto.getPhone().trim());
         entity.setPassword(dto.getPassword().trim());
         if (entity.getId() == null) {
             entity.setStatus(ProfileStatus.ACTIVE);
             entity.setVisible(true);
-            entity.setRole(((ProfileRequestDTO) (dto)).getRole());
         }
         return entity;
     }
@@ -36,9 +29,10 @@ public class ProfileUtil implements BaseEntityUtil<BaseProfileDTO, ProfileRespon
         /*if (dto.getSurname() != null && dto.getSurname().trim().length() < 3) {
             throw new IllegalArgumentException("Invalid surname. Surname can not be empty");
         }*/
-        if (dto.getRole() != null && (dto.getRole().equals(ProfileRole.ROLE_USER) || dto.getRole().equals(ProfileRole.ROLE_ADMIN))) {
-            throw new IllegalArgumentException("Admin can not do operations on another admin or user, only (moderator or publisher)");
-        }
+//        if (dto.getRole() != null && (dto.getRole().equals(ProfileRole.ROLE_USER) || dto.getRole().equals(ProfileRole.ROLE_ADMIN))) {
+//            throw new IllegalArgumentException("Admin can not do operations on another admin or user, only (moderator or publisher)");
+//        }
+        //TODO Check that admin can only create moderator and publisher and convert from user to those 2 but not create user
     }
 
     public ProfileResponseDTO toDto(ProfileEntity entity) {
@@ -46,8 +40,7 @@ public class ProfileUtil implements BaseEntityUtil<BaseProfileDTO, ProfileRespon
         dto.setId(entity.getId());
         dto.setName(entity.getName());
         dto.setSurname(entity.getSurname());
-        dto.setPhone(entity.getPhone());
-        dto.setRole(entity.getRole());
+//        dto.setRole(entity.getRole());
         dto.setCreatedDate(entity.getCreatedDate());
         return dto;
     }

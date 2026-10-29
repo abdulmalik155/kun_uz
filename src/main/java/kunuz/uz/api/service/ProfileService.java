@@ -2,7 +2,6 @@ package kunuz.uz.api.service;
 
 import kunuz.uz.api.dto.request.ProfileFilterDTO;
 import kunuz.uz.api.dto.request.ProfileRequestDTO;
-import kunuz.uz.api.dto.request.BaseProfileDTO;
 import kunuz.uz.api.dto.response.ProfileResponseDTO;
 import kunuz.uz.api.entity.ProfileEntity;
 import kunuz.uz.api.exceptions.profile.ProfileNotFoundException;
@@ -42,7 +41,7 @@ public class ProfileService {
         return update(id, dto);
     }
 
-    private ProfileResponseDTO update(Long id, BaseProfileDTO dto){
+    private ProfileResponseDTO update(Long id, ProfileRequestDTO dto) {
         ProfileEntity entityToUpdate = getEntityOrThrow(id);
         entityToUpdate = util.toEntity(dto, entityToUpdate);
         ProfileEntity updatedEntity = repository.save(entityToUpdate);
@@ -50,7 +49,7 @@ public class ProfileService {
         return responseDTO;
     }
 
-    public ProfileResponseDTO updateWithDetail(Long id, BaseProfileDTO dto) {
+    public ProfileResponseDTO updateWithDetail(Long id, ProfileRequestDTO dto) {
         return update(id, dto);
     }
 

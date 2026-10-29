@@ -29,11 +29,8 @@ public class ProfileEntity {
     @Column(name = "surname", columnDefinition = "varchar(255) default 'Examplebekov'")
     private String surname = "Examplebekov";
 
-    @Column(name = "email", unique = true)
-    private String email;
-
-    @Column(name = "phone", unique = true, nullable = false)
-    private String phone;
+    @Column(name = "username")
+    private String username;
 
     @Column(name = "password", nullable = false)
     private String password;
