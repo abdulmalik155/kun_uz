@@ -6,7 +6,7 @@ public interface BaseEntityUtil<RequestDTO, ResponseDTO, Entity> {
 
     Entity toEntity(RequestDTO dto, Entity entity);
 
-    ResponseDTO toResponseDto(Entity entity);
+    ResponseDTO toDto(Entity entity);
 
-    List<ResponseDTO> toResponseDtoList(Iterable<Entity> iterable);
+    List<ResponseDTO> toDtoList(Iterable<Entity> iterable);
 }

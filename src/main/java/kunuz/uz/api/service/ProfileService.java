@@ -1,10 +1,9 @@
 package kunuz.uz.api.service;
 
-import jakarta.validation.Valid;
-import kunuz.uz.api.dto.request.profile.filter.ProfileFilterDTO;
-import kunuz.uz.api.dto.request.profile.ProfileRequestDTO;
-import kunuz.uz.api.dto.request.profile.BaseProfileDTO;
-import kunuz.uz.api.dto.response.profile.ProfileResponseDTO;
+import kunuz.uz.api.dto.request.ProfileFilterDTO;
+import kunuz.uz.api.dto.request.ProfileRequestDTO;
+import kunuz.uz.api.dto.request.BaseProfileDTO;
+import kunuz.uz.api.dto.response.ProfileResponseDTO;
 import kunuz.uz.api.entity.ProfileEntity;
 import kunuz.uz.api.exceptions.profile.ProfileNotFoundException;
 import kunuz.uz.api.repository.custom.classes.ProfileCustomRepository;
@@ -34,7 +33,7 @@ public class ProfileService {
         util.check(dto);
         ProfileEntity entity = util.toEntity(dto, new ProfileEntity());
         repository.save(entity);
-        ProfileResponseDTO responseDTO = util.toResponseDto(entity);
+        ProfileResponseDTO responseDTO = util.toDto(entity);
         return responseDTO;
     }
 
@@ -47,7 +46,7 @@ public class ProfileService {
         ProfileEntity entityToUpdate = getEntityOrThrow(id);
         entityToUpdate = util.toEntity(dto, entityToUpdate);
         ProfileEntity updatedEntity = repository.save(entityToUpdate);
-        ProfileResponseDTO responseDTO = util.toResponseDto(updatedEntity);
+        ProfileResponseDTO responseDTO = util.toDto(updatedEntity);
         return responseDTO;
     }
 
@@ -65,7 +64,7 @@ public class ProfileService {
         page--;
         PageRequest request = PageRequest.of(page, size, Sort.by("createdDate").descending());
         Page<ProfileEntity> entities = repository.findAll(request);
-        return new PageImpl<>(util.toResponseDtoList(entities.getContent()), entities.getPageable(), entities.getTotalElements());
+        return new PageImpl<>(util.toDtoList(entities.getContent()), entities.getPageable(), entities.getTotalElements());
     }
 
     public void deleteById(Long id) {
@@ -79,6 +78,6 @@ public class ProfileService {
         PaginationUtil.check(page, size);
         page--;
         Page<ProfileEntity> entities = customRepository.filter(page, size, dto);
-        return new PageImpl<>(util.toResponseDtoList(entities.getContent()), entities.getPageable(), entities.getTotalElements());
+        return new PageImpl<>(util.toDtoList(entities.getContent()), entities.getPageable(), entities.getTotalElements());
     }
 }

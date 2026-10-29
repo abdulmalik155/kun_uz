@@ -2,7 +2,7 @@ package kunuz.uz.api.repository.custom.classes;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
-import kunuz.uz.api.dto.request.articleType.filter.ArticleTypeFilterDTO;
+import kunuz.uz.api.dto.request.ArticleTypeFilterDTO;
 import kunuz.uz.api.entity.ArticleTypeEntity;
 import kunuz.uz.api.enums.Language;
 import kunuz.uz.api.exceptions.articleType.LanguageNotSupportedException;

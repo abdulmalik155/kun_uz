@@ -1,11 +1,9 @@
 package kunuz.uz.api.mapper.category;
 
-import lombok.Getter;
-import lombok.Setter;
+public interface CategoryShort {
+    Integer getId();
 
-@Getter
-@Setter
-public class CategoryShort {
-    private Integer id;
-    private String name;
+    String getKey();
+
+    String getName();
 }

@@ -1,9 +1,9 @@
 package kunuz.uz.api.service;
 
-import kunuz.uz.api.dto.request.region.BaseRegionDTO;
-import kunuz.uz.api.dto.request.region.RegionRequestDTO;
-import kunuz.uz.api.dto.request.region.filter.RegionFilterDTO;
-import kunuz.uz.api.dto.response.region.RegionResponseDTO;
+import kunuz.uz.api.dto.request.BaseRegionDTO;
+import kunuz.uz.api.dto.request.RegionRequestDTO;
+import kunuz.uz.api.dto.request.RegionFilterDTO;
+import kunuz.uz.api.dto.response.RegionResponseDTO;
 import kunuz.uz.api.entity.RegionEntity;
 import kunuz.uz.api.enums.Language;
 import kunuz.uz.api.exceptions.region.RegionNotFoundException;
@@ -36,7 +36,7 @@ public class RegionService {
     public RegionResponseDTO create(RegionRequestDTO dto) {
         RegionEntity entity = util.toEntity(dto, new RegionEntity());
         RegionEntity saved = repository.save(entity);
-        RegionResponseDTO responseDTO = util.toResponseDto(saved);
+        RegionResponseDTO responseDTO = util.toDto(saved);
         return responseDTO;
     }
 
@@ -44,7 +44,7 @@ public class RegionService {
         RegionEntity entityToUpdate =  getEntityOrThrow(id);
         entityToUpdate = util.toEntity(dto, entityToUpdate);
         RegionEntity updated = repository.save(entityToUpdate);
-        RegionResponseDTO responseDTO = util.toResponseDto(updated);
+        RegionResponseDTO responseDTO = util.toDto(updated);
         return responseDTO;
     }
 
@@ -65,23 +65,24 @@ public class RegionService {
         PaginationUtil.check(page,size);
         page--;
         Page<RegionEntity> entities = customRepository.filter(page,size,dto);
-        List<RegionResponseDTO> responseDTOList = util.toResponseDtoList(entities.getContent());
+        List<RegionResponseDTO> responseDTOList = util.toDtoList(entities.getContent());
         return new PageImpl<>(responseDTOList, entities.getPageable(), entities.getTotalElements());
     }
 
     public Page<RegionShort> getByLanguage(int page, int size, Language language) {
-        PaginationUtil.check(page, size);
-        page--;
-        if (language == null ) throw new IllegalArgumentException("Language of name of region can not be empty");
-
-        Page<Object[]> entities = customRepository.getByLanguage(page,size,language);
-
-        return new PageImpl<>(util
-                .shortToResponseDtoList(
-                        entities.getContent()
-                ),
-                entities.getPageable(),
-                entities.getTotalElements());
+//        PaginationUtil.check(page, size);
+//        page--;
+//        if (language == null ) throw new IllegalArgumentException("Language of name of region can not be empty");
+//
+//        Page<Object[]> entities = customRepository.getByLanguage(page,size,language);
+//
+//        return new PageImpl<>(util
+//                .shortToResponseDtoList(
+//                        entities.getContent()
+//                ),
+//                entities.getPageable(),
+//                entities.getTotalElements());
+        return null;
     }
 
 
@@ -91,7 +92,7 @@ public class RegionService {
         PageRequest request = PageRequest.of(page,size, Sort.by("createdDate").descending());
         Page<RegionEntity> entities = repository.findAll(request);
         return new PageImpl<>(util
-                .toResponseDtoList(entities.getContent()),
+                .toDtoList(entities.getContent()),
                 entities.getPageable(),
                 entities.getTotalElements());
     }

@@ -1,4 +1,4 @@
-package kunuz.uz.api.dto.request.category;
+package kunuz.uz.api.dto.request;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -7,8 +7,11 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class CategoryRequestDTO extends BaseCategoryDTO{
+public class RegionRequestDTO extends BaseRegionDTO {
+
     @NotNull(message = "Order number is required")
-    @Min(value = 0, message = "Minimum value for order is 0")
+    @Min(value = 1, message = "Minimum value for order is 1")
     private Integer orderNumber;
+
+
 }

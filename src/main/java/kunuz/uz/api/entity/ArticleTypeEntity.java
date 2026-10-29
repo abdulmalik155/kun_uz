@@ -36,6 +36,10 @@ public class ArticleTypeEntity {
     @Column(name = "visible", nullable = false, columnDefinition = "boolean default true")
     private Boolean visible = true;
 
+    @Column(name = "key", unique = true, nullable = false, columnDefinition = "varchar(255) default 'Article type'")
+    private String key;
+
+
     @CurrentTimestamp
     @Column(name = "created_date", nullable = false)
     private LocalDateTime createdDate;

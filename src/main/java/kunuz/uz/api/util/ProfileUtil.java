@@ -1,8 +1,8 @@
 package kunuz.uz.api.util;
 
-import kunuz.uz.api.dto.request.profile.BaseProfileDTO;
-import kunuz.uz.api.dto.request.profile.ProfileRequestDTO;
-import kunuz.uz.api.dto.response.profile.ProfileResponseDTO;
+import kunuz.uz.api.dto.request.BaseProfileDTO;
+import kunuz.uz.api.dto.request.ProfileRequestDTO;
+import kunuz.uz.api.dto.response.ProfileResponseDTO;
 import kunuz.uz.api.entity.ProfileEntity;
 import kunuz.uz.api.enums.ProfileRole;
 import kunuz.uz.api.enums.ProfileStatus;
@@ -41,7 +41,7 @@ public class ProfileUtil implements BaseEntityUtil<BaseProfileDTO, ProfileRespon
         }
     }
 
-    public ProfileResponseDTO toResponseDto(ProfileEntity entity) {
+    public ProfileResponseDTO toDto(ProfileEntity entity) {
         ProfileResponseDTO dto = new ProfileResponseDTO();
         dto.setId(entity.getId());
         dto.setName(entity.getName());
@@ -52,10 +52,10 @@ public class ProfileUtil implements BaseEntityUtil<BaseProfileDTO, ProfileRespon
         return dto;
     }
 
-    public List<ProfileResponseDTO> toResponseDtoList(Iterable<ProfileEntity> iterable) {
+    public List<ProfileResponseDTO> toDtoList(Iterable<ProfileEntity> iterable) {
         List<ProfileResponseDTO> list = new LinkedList<>();
         for (ProfileEntity entity : iterable) {
-            list.add(toResponseDto(entity));
+            list.add(toDto(entity));
         }
         return list;
     }

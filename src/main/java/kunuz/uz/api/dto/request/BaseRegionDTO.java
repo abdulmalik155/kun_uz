@@ -1,4 +1,4 @@
-package kunuz.uz.api.dto.request.region;
+package kunuz.uz.api.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

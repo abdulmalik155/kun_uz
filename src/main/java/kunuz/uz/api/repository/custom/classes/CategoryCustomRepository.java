@@ -2,10 +2,8 @@ package kunuz.uz.api.repository.custom.classes;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
-import kunuz.uz.api.dto.request.category.filter.CategoryFilterDTO;
-import kunuz.uz.api.dto.request.region.filter.RegionFilterDTO;
+import kunuz.uz.api.dto.request.CategoryFilterDTO;
 import kunuz.uz.api.entity.CategoryEntity;
-import kunuz.uz.api.entity.RegionEntity;
 import kunuz.uz.api.enums.Language;
 import kunuz.uz.api.exceptions.articleType.LanguageNotSupportedException;
 import org.jspecify.annotations.NonNull;
@@ -27,6 +25,9 @@ public class CategoryCustomRepository {
     private EntityManager entityManager;
 
     public Page<Object[]> getByLanguage(int page, int size, Language language) {
+        entityManager.flush();
+        entityManager.clear();
+        System.out.println("Custom builder here");
         StringBuilder selectQueryBuilder = new StringBuilder("select c.id as id ");
         String countQueryBuilder = "select count(c) as count from CategoryEntity c";
 
@@ -70,6 +71,8 @@ public class CategoryCustomRepository {
     }
 
     public Page<CategoryEntity> findAll(int page, int size, CategoryFilterDTO dto) {
+        entityManager.flush();
+        entityManager.clear();
         StringBuilder selectBuilder = new StringBuilder("select c from CategoryEntity c");
         StringBuilder countBuilder = new StringBuilder("select count(c) from CategoryEntity c");
         StringBuilder queryBuilder = new StringBuilder(" where c.visible = true");

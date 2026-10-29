@@ -1,4 +1,4 @@
-package kunuz.uz.api.dto.response.region;
+package kunuz.uz.api.dto.response;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -9,9 +9,10 @@ import java.time.LocalDateTime;
 @Setter
 public class RegionResponseDTO {
     private Integer id;
+    private Integer orderNumber;
     private String nameUz;
     private String nameRu;
     private String nameEn;
-    private Boolean visible;
+    private String key;
     private LocalDateTime createdDate;
 }

@@ -1,8 +1,8 @@
 package kunuz.uz.api.controller;
 
-import kunuz.uz.api.dto.request.articleType.ArticleTypeRequestDTO;
-import kunuz.uz.api.dto.request.articleType.filter.ArticleTypeFilterDTO;
-import kunuz.uz.api.dto.response.articleType.ArticleTypeResponseDTO;
+import kunuz.uz.api.dto.request.ArticleTypeRequestDTO;
+import kunuz.uz.api.dto.request.ArticleTypeFilterDTO;
+import kunuz.uz.api.dto.response.ArticleTypeResponseDTO;
 import kunuz.uz.api.enums.Language;
 import kunuz.uz.api.mapper.articleType.ArticleTypeShort;
 import kunuz.uz.api.service.ArticleTypeService;

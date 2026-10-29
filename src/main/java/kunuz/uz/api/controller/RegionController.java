@@ -1,10 +1,10 @@
 package kunuz.uz.api.controller;
 
 import jakarta.validation.Valid;
-import kunuz.uz.api.dto.request.region.BaseRegionDTO;
-import kunuz.uz.api.dto.request.region.RegionRequestDTO;
-import kunuz.uz.api.dto.request.region.filter.RegionFilterDTO;
-import kunuz.uz.api.dto.response.region.RegionResponseDTO;
+import kunuz.uz.api.dto.request.BaseRegionDTO;
+import kunuz.uz.api.dto.request.RegionRequestDTO;
+import kunuz.uz.api.dto.request.RegionFilterDTO;
+import kunuz.uz.api.dto.response.RegionResponseDTO;
 import kunuz.uz.api.enums.Language;
 import kunuz.uz.api.mapper.region.RegionShort;
 import kunuz.uz.api.service.RegionService;

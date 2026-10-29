@@ -1,4 +1,4 @@
-package kunuz.uz.api.dto.request.articleType;
+package kunuz.uz.api.dto.request;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -24,6 +24,6 @@ public class ArticleTypeRequestDTO{
     private String nameEn;
 
     @NotNull(message = "Order number is required")
-    @Min(value = 0, message = "Minimum value for order is 0")
+    @Min(value = 1, message = "Minimum value for order is 1")
     private Integer orderNumber;
 }

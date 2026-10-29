@@ -1,4 +1,4 @@
-package kunuz.uz.api.dto.request.articleType.filter;
+package kunuz.uz.api.dto.request;
 
 import lombok.Getter;
 import lombok.Setter;
