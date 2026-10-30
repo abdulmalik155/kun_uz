@@ -40,10 +40,6 @@ public class ProfileEntity {
     @Enumerated(EnumType.STRING)
     private ProfileStatus status;
 
-    @Column(name = "role", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private ProfileRole role;
-
     @OneToMany(mappedBy = "profile")
     private List<ProfileRoleEntity>  roleList;
 

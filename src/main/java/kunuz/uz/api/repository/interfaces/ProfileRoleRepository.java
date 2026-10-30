@@ -6,7 +6,6 @@ import kunuz.uz.api.enums.ProfileRole;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -19,8 +18,8 @@ public interface ProfileRoleRepository extends CrudRepository<ProfileRoleEntity,
 
     @Modifying
     @Transactional
-    @Query(value = "DELETE FROM ProfileRoleEntity AS pr WHERE pr.profileId = :profileId AND pr.role = :role")
-    void deleteByProfileIdAndRole(@Param(value = ":profileId") Long profileId,@Param(value = "role") ProfileRole role);
+    @Query(value = "DELETE FROM ProfileRoleEntity AS pr WHERE pr.profileId = ?1 AND pr.role = ?2")
+    void deleteByProfileIdAndRole(Long profileId, ProfileRole role);
 
 
     @Modifying

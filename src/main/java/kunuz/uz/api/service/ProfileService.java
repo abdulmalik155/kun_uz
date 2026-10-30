@@ -3,6 +3,7 @@ package kunuz.uz.api.service;
 import kunuz.uz.api.dto.request.profile.*;
 import kunuz.uz.api.dto.response.ProfileResponseDTO;
 import kunuz.uz.api.entity.ProfileEntity;
+import kunuz.uz.api.entity.ProfileRoleEntity;
 import kunuz.uz.api.enums.ProfileRole;
 import kunuz.uz.api.enums.ProfileStatus;
 import kunuz.uz.api.exceptions.profile.PasswordMismatchException;
@@ -81,7 +82,7 @@ public class ProfileService {
         entity.setSurname(newDto.getSurname());
         entity.setUsername(newDto.getUsername());
         repository.save(entity);
-        roleService.merge(entity.getId(), newDto.getRoleList());
+        roleService.merge(id, newDto.getRoleList());
         ProfileResponseDTO responseDTO = util.toDto(entity);
         responseDTO.setRoleList(newDto.getRoleList());
         return responseDTO;
@@ -104,7 +105,7 @@ public class ProfileService {
         PaginationUtil.check(page, size);
         page--;
         PageRequest request = PageRequest.of(page, size, Sort.by("createdDate").descending());
-        Page<ProfileEntity> entities = repository.findAll(request);
+        Page<ProfileEntity> entities = repository.findAllWithRole(request);
         return new PageImpl<>(util.toDtoList(entities.getContent()), entities.getPageable(), entities.getTotalElements());
     }
 
@@ -129,10 +130,7 @@ public class ProfileService {
             dto.setUsername(entity.getUsername());
             dto.setRoleList(entity.getRoleList()
                     .stream()
-                    .map(roleEntity->
-                    {
-                        return entity.getRole();
-                    }).toList());
+                    .map(ProfileRoleEntity::getRole).toList());
             dto.setCreatedDate(entity.getCreatedDate());
             dto.setStatus(entity.getStatus());
             dto.setPhotoId(entity.getPhotoId());
@@ -149,7 +147,7 @@ public class ProfileService {
 
     public Boolean updatePassword(Long id, ProfilePasswordUpdateDTO dto) {
         ProfileEntity entity = getOrThrow(id);
-        if(!encoder.matches(entity.getPassword(), dto.getCurrentPassword())){
+        if(!encoder.matches(dto.getCurrentPassword(), entity.getPassword())){
             throw new PasswordMismatchException("Wrong password");
         }
         entity.setPassword(encoder.encode(dto.getNewPassword().trim()));
