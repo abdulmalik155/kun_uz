@@ -1,10 +1,14 @@
 package kunuz.uz.api.service;
 
-import kunuz.uz.api.dto.request.ProfileFilterDTO;
-import kunuz.uz.api.dto.request.ProfileRequestDTO;
+import kunuz.uz.api.dto.request.profile.*;
 import kunuz.uz.api.dto.response.ProfileResponseDTO;
 import kunuz.uz.api.entity.ProfileEntity;
+import kunuz.uz.api.enums.ProfileRole;
+import kunuz.uz.api.enums.ProfileStatus;
+import kunuz.uz.api.exceptions.profile.PasswordMismatchException;
+import kunuz.uz.api.exceptions.profile.ProfileExistsException;
 import kunuz.uz.api.exceptions.profile.ProfileNotFoundException;
+import kunuz.uz.api.mapper.profile.ProfileInfoDTO;
 import kunuz.uz.api.repository.custom.classes.ProfileCustomRepository;
 import kunuz.uz.api.repository.interfaces.ProfileRepository;
 import kunuz.uz.api.util.PaginationUtil;
@@ -14,7 +18,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ProfileService {
@@ -28,32 +37,65 @@ public class ProfileService {
     @Autowired
     private ProfileUtil util;
 
+    @Autowired
+    private BCryptPasswordEncoder encoder;
+
+    @Autowired
+    private ProfileRoleService roleService;
+
     public ProfileResponseDTO create(ProfileRequestDTO dto) {
-        util.check(dto);
-        ProfileEntity entity = util.toEntity(dto, new ProfileEntity());
+        createCheck(dto);
+        ProfileEntity entity = new ProfileEntity();
+        entity.setName(dto.getName());
+        entity.setSurname(dto.getSurname());
+        entity.setUsername(dto.getUsername());
+        entity.setVisible(true);
+        entity.setStatus(ProfileStatus.ACTIVE);
+        entity.setPassword(encoder.encode(dto.getPassword()));
         repository.save(entity);
+        roleService.create(entity.getId(), dto.getRoleList());
         ProfileResponseDTO responseDTO = util.toDto(entity);
         return responseDTO;
     }
 
-    public ProfileResponseDTO updateForAdmin(Long id, ProfileRequestDTO dto) {
-        util.check(dto);
-        return update(id, dto);
+    private void createCheck(ProfileRequestDTO dto) {
+        Optional<ProfileEntity> optionalExisting = repository.findByUsername(dto.getUsername().trim());
+        if(optionalExisting.isPresent()){
+            throw new ProfileExistsException("Profile already exists");
+        }
+        dto.getRoleList()
+                .removeIf(profileRole ->
+                        profileRole.equals(ProfileRole.ROLE_USER) || profileRole.equals(ProfileRole.ROLE_ADMIN));
+        if(dto.getRoleList().isEmpty()){
+            throw new IllegalArgumentException("Admin can not create another admin or user");
+        }
     }
 
-    private ProfileResponseDTO update(Long id, ProfileRequestDTO dto) {
-        ProfileEntity entityToUpdate = getEntityOrThrow(id);
-        entityToUpdate = util.toEntity(dto, entityToUpdate);
-        ProfileEntity updatedEntity = repository.save(entityToUpdate);
-        ProfileResponseDTO responseDTO = util.toDto(updatedEntity);
+    public ProfileResponseDTO updateForAdmin(Long id, ProfileUpdateDTO newDto) {
+        Optional<ProfileEntity> optionalExisting = repository.findByUsername(newDto.getUsername().trim());
+        if(optionalExisting.isEmpty()){
+            throw new ProfileNotFoundException("Profile doesn't exists");
+        }
+        ProfileEntity entity = getOrThrow(id);
+        entity.setName(newDto.getName());
+        entity.setSurname(newDto.getSurname());
+        entity.setUsername(newDto.getUsername());
+        repository.save(entity);
+        roleService.merge(entity.getId(), newDto.getRoleList());
+        ProfileResponseDTO responseDTO = util.toDto(entity);
+        responseDTO.setRoleList(newDto.getRoleList());
         return responseDTO;
     }
 
-    public ProfileResponseDTO updateWithDetail(Long id, ProfileRequestDTO dto) {
-        return update(id, dto);
+    public ProfileResponseDTO updateDetail(Long id, ProfileUpdateDetailDTO dto) {
+        ProfileEntity entityToUpdate = getOrThrow(id);
+        entityToUpdate.setName(dto.getName());
+        entityToUpdate.setSurname(dto.getSurname());
+        repository.save(entityToUpdate);
+        return util.toDto(entityToUpdate);
     }
 
-    private ProfileEntity getEntityOrThrow(Long id) {
+    private ProfileEntity getOrThrow(Long id) {
         return repository.findById(id)
                 .orElseThrow(() -> new ProfileNotFoundException(String.format("There is no profile with such id %s", id)));
     }
@@ -67,16 +109,51 @@ public class ProfileService {
     }
 
     public void deleteById(Long id) {
-//        repository.deleteById(id);
-        ProfileEntity existingEntity = getEntityOrThrow(id);
-        existingEntity.setVisible(false);
-        repository.save(existingEntity);
+        repository.updateVisibleById(id);
     }
 
-    public Page<ProfileResponseDTO> filter(int page, int size, ProfileFilterDTO dto) {
+    public Page<ProfileInfoDTO> filter(int page, int size, ProfileFilterDTO dto) {
         PaginationUtil.check(page, size);
         page--;
         Page<ProfileEntity> entities = customRepository.filter(page, size, dto);
-        return new PageImpl<>(util.toDtoList(entities.getContent()), entities.getPageable(), entities.getTotalElements());
+        return new PageImpl<>(toInfoList(entities.getContent()), entities.getPageable(), entities.getTotalElements());
+    }
+
+    private List<ProfileInfoDTO> toInfoList(Iterable<ProfileEntity> iterable){
+        List<ProfileInfoDTO> list = new LinkedList<>();
+        for (ProfileEntity entity : iterable) {
+            ProfileInfoDTO dto = new ProfileInfoDTO();
+            dto.setId(entity.getId());
+            dto.setName(entity.getName());
+            dto.setSurname(entity.getSurname());
+            dto.setUsername(entity.getUsername());
+            dto.setRoleList(entity.getRoleList()
+                    .stream()
+                    .map(roleEntity->
+                    {
+                        return entity.getRole();
+                    }).toList());
+            dto.setCreatedDate(entity.getCreatedDate());
+            dto.setStatus(entity.getStatus());
+            dto.setPhotoId(entity.getPhotoId());
+            list.add(dto);
+        }
+        return list;
+    }
+
+    public ProfileResponseDTO getById(Long id) {
+        ProfileResponseDTO dto = util.toDto(getOrThrow(id));
+        dto.setRoleList(roleService.getAllByProfileId(id));
+        return dto;
+    }
+
+    public Boolean updatePassword(Long id, ProfilePasswordUpdateDTO dto) {
+        ProfileEntity entity = getOrThrow(id);
+        if(!encoder.matches(entity.getPassword(), dto.getCurrentPassword())){
+            throw new PasswordMismatchException("Wrong password");
+        }
+        entity.setPassword(encoder.encode(dto.getNewPassword().trim()));
+        repository.save(entity);
+        return true;
     }
 }

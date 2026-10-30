@@ -1,9 +1,9 @@
 package kunuz.uz.api.controller;
 
 import jakarta.validation.Valid;
-import kunuz.uz.api.dto.request.ProfileFilterDTO;
-import kunuz.uz.api.dto.request.ProfileRequestDTO;
+import kunuz.uz.api.dto.request.profile.*;
 import kunuz.uz.api.dto.response.ProfileResponseDTO;
+import kunuz.uz.api.mapper.profile.ProfileInfoDTO;
 import kunuz.uz.api.service.ProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -15,21 +15,8 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(value = "/api/v1/profile")
 public class ProfileController {
     //2. Profile
-//    1. Create profile (ADMIN) (can create ROLE_MODERATOR, ROLE_PUBLISHER))
-//         Request: name,surname,username(email/phone),password,status, roleList[]
-//         Response: ProfileInfoDTO
-//    2. Get By Id. (id bo'yicha bittasini return qiladi) (ADMIN)
-//    3. Update Profile (ADMIN)
-//    4. Update Profile Detail (ANY) (Profile updates own details)
-//    5. Profile List (ADMIN) (Pagination)
-//    6. Delete Profile By Id (ADMIN)
 //    7. Update Photo (ANY) (Murojat qilgan odamni rasmini update qilish)   (remove old image)
 //           photo_id
-//    8. Update Password (ANY) (Murojat qilgan odamni password-ni update qilish)
-//    9. Filter (query (name/surname/username),role,created_date_from,created_date_to) (ADMIN)
-//        Response: ProfileInfoDTO
-//
-//     ProfileInfoDTO{id,name,surname,username,roleList['',''],createdDate,status,photo_id}
     @Autowired
     private ProfileService service;
 
@@ -42,22 +29,23 @@ public class ProfileController {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.create(dto));
     }
 
-    public ResponseEntity<ProfileResponseDTO> getById(){
-        return ResponseEntity.status(HttpStatus.OK).build();
+    @GetMapping(value = "/byId")
+    public ResponseEntity<ProfileResponseDTO> getById(@RequestHeader(value = "profile-id")Long id){
+        return ResponseEntity.ok(service.getById(id));
+
     }
-    //TODO do the get by id method
     /**
      * Only for admin access
      *
      */
     @PutMapping(value = "")
-    public ResponseEntity<ProfileResponseDTO> update(@RequestParam(value = "profileId") Long id, @Valid @RequestBody ProfileRequestDTO dto) {
+    public ResponseEntity<ProfileResponseDTO> update(@RequestParam(value = "profileId") Long id, @Valid @RequestBody ProfileUpdateDTO dto) {
         return ResponseEntity.ok(service.updateForAdmin(id, dto));
     }
 
     @PutMapping(value = "/updateForAnyUser")
-    public ResponseEntity<ProfileResponseDTO> updateDetail(@RequestParam(value = "profileId") Long id, @Valid @RequestBody ProfileRequestDTO dto) {
-        return ResponseEntity.ok(service.updateWithDetail(id, dto));
+    public ResponseEntity<ProfileResponseDTO> updateDetail(@RequestParam(value = "profileId") Long id, @Valid @RequestBody ProfileUpdateDetailDTO dto) {
+        return ResponseEntity.ok(service.updateDetail(id, dto));
     }
 
     /**
@@ -80,16 +68,16 @@ public class ProfileController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
-    public ResponseEntity<?> updatePassword(){
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    @PutMapping(value = "/password-update")
+    public ResponseEntity<Boolean> updatePassword(@RequestHeader(value = "profile-id")Long id,
+                                            @RequestBody ProfilePasswordUpdateDTO dto){
+        return ResponseEntity.ok(service.updatePassword(id,dto));
     }
 
-    //TODO complete the update password method api
-
     @PostMapping(value = "/filter")
-    public ResponseEntity<Page<ProfileResponseDTO>> filter(@RequestParam(value = "page", defaultValue = "1") int page,
-                                                           @RequestParam(value = "size", defaultValue = "10") int size,
-                                                           @RequestBody ProfileFilterDTO dto) {
+    public ResponseEntity<Page<ProfileInfoDTO>> filter(@RequestParam(value = "page", defaultValue = "1") int page,
+                                                       @RequestParam(value = "size", defaultValue = "10") int size,
+                                                       @RequestBody ProfileFilterDTO dto) {
         return ResponseEntity.ok(service.filter(page, size, dto));
     }
 }

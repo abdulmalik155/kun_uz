@@ -2,7 +2,7 @@ package kunuz.uz.api.repository.custom.classes;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
-import kunuz.uz.api.dto.request.ProfileFilterDTO;
+import kunuz.uz.api.dto.request.profile.ProfileFilterDTO;
 import kunuz.uz.api.entity.ProfileEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -35,9 +35,9 @@ public class ProfileCustomRepository {
             queryBuilder.append(" and p.surname = :surname");
             params.put("surname", dto.getSurname());
         }
-        if (dto.getPhone() != null && !dto.getPhone().isBlank()) {
+        if (dto.getUsername() != null && !dto.getUsername().isBlank()) {
             queryBuilder.append(" and p.phone = :phone");
-            params.put("phone", dto.getPhone());
+            params.put("phone", dto.getUsername());
         }
         if (dto.getRole() != null) {
             queryBuilder.append(" and p.role = :role");

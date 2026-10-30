@@ -1,4 +1,4 @@
-package kunuz.uz.api.dto.request;
+package kunuz.uz.api.dto.request.profile;
 
 import kunuz.uz.api.enums.ProfileRole;
 import lombok.Getter;
@@ -11,7 +11,7 @@ import java.time.LocalDate;
 public class ProfileFilterDTO {
     private String name;
     private String surname;
-    private String phone;
+    private String username;
     private ProfileRole role;
     private LocalDate createdDateFrom;
     private LocalDate createdDateTo;

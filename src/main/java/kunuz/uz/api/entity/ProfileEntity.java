@@ -9,6 +9,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "profile")
@@ -39,9 +40,12 @@ public class ProfileEntity {
     @Enumerated(EnumType.STRING)
     private ProfileStatus status;
 
-    @Column(name = "role", nullable = false, updatable = false)
+    @Column(name = "role", nullable = false)
     @Enumerated(EnumType.STRING)
     private ProfileRole role;
+
+    @OneToMany(mappedBy = "profile")
+    private List<ProfileRoleEntity>  roleList;
 
     @Column(name = "visible", nullable = false, columnDefinition = "boolean default true")
     private Boolean visible = true;
