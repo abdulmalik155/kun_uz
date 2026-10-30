@@ -26,20 +26,20 @@ public class ProfileController {
 
     //ADMIN
     @GetMapping(value = "/byId")
-    public ResponseEntity<ProfileResponseDTO> getById(@RequestHeader(value = "profile-id")Long id){
+    public ResponseEntity<ProfileResponseDTO> getById(@RequestHeader(value = "id") Long id) {
         return ResponseEntity.ok(service.getById(id));
     }
 
     //ADMIN
     @PutMapping(value = "")
-    public ResponseEntity<ProfileResponseDTO> update(@RequestParam(value = "profileId") Long id,
+    public ResponseEntity<ProfileResponseDTO> update(@RequestHeader(value = "id") Long id,
                                                      @Valid @RequestBody ProfileUpdateDTO dto) {
         return ResponseEntity.ok(service.updateForAdmin(id, dto));
     }
 
     //ANY
     @PutMapping(value = "/update-any")
-    public ResponseEntity<ProfileResponseDTO> updateDetail(@RequestParam(value = "profileId") Long id,
+    public ResponseEntity<ProfileResponseDTO> updateDetail(@RequestHeader(value = "id") Long id,
                                                            @Valid @RequestBody ProfileUpdateDetailDTO dto) {
         return ResponseEntity.ok(service.updateDetail(id, dto));
     }
@@ -53,16 +53,16 @@ public class ProfileController {
 
     //ADMIN
     @DeleteMapping(value = "")
-    public ResponseEntity<?> deleteById(@RequestParam(value = "profileId") Long id) {
+    public ResponseEntity<?> deleteById(@RequestHeader(value = "id") Long id) {
         service.deleteById(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     //ANY
-    @PutMapping(value = "/password-update")
-    public ResponseEntity<Boolean> updatePassword(@RequestHeader(value = "profile-id")Long id,
-                                            @RequestBody ProfilePasswordUpdateDTO dto){
-        return ResponseEntity.ok(service.updatePassword(id,dto));
+    @PutMapping(value = "/password")
+    public ResponseEntity<Boolean> updatePassword(@RequestHeader(value = "id") Long id,
+                                                  @RequestBody ProfilePasswordUpdateDTO dto) {
+        return ResponseEntity.ok(service.updatePassword(id, dto));
     }
 
     //ADMIN

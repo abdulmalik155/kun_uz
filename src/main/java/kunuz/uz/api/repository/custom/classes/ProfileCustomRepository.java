@@ -21,23 +21,23 @@ public class ProfileCustomRepository {
     private EntityManager entityManager;
 
     public Page<ProfileEntity> filter(int page, int size, ProfileFilterDTO dto) {
-        StringBuilder selectQueryBuilder = new StringBuilder("select p from ProfileEntity p ");
-        StringBuilder countQueryBuilder = new StringBuilder("select count(p) from ProfileEntity p ");
+        StringBuilder selectQueryBuilder = new StringBuilder("select p from ProfileEntity p inner join fetch p.roleList ");
+        StringBuilder countQueryBuilder = new StringBuilder("select count(p) from ProfileEntity p inner join p.roleList ");
 
         StringBuilder queryBuilder = new StringBuilder(" where p.visible = true ");
         Map<String, Object> params = new LinkedHashMap<>();
 
         if (dto.getName() != null && !dto.getName().isBlank()) {
-            queryBuilder.append(" and p.name = :name");
-            params.put("name", dto.getName());
+            queryBuilder.append(" and lower(p.name) like lower(:name)");
+            params.put("name", "%" + dto.getName() + "%");
         }
         if (dto.getSurname() != null && !dto.getSurname().isBlank()) {
-            queryBuilder.append(" and p.surname = :surname");
-            params.put("surname", dto.getSurname());
+            queryBuilder.append(" and lower(p.surname) like lower(:surname)");
+            params.put("surname", "%" + dto.getSurname() + "%");
         }
         if (dto.getUsername() != null && !dto.getUsername().isBlank()) {
-            queryBuilder.append(" and p.phone = :phone");
-            params.put("phone", dto.getUsername());
+            queryBuilder.append(" and p.phone like :phone");
+            params.put("phone", "%" + dto.getUsername() + "%");
         }
         if (dto.getRole() != null) {
             queryBuilder.append(" and p.role = :role");
@@ -53,11 +53,11 @@ public class ProfileCustomRepository {
         }
 
         countQueryBuilder.append(queryBuilder);
-        queryBuilder.append(" order by p.name asc, p.createdDate desc");
+        queryBuilder.append(" order by p.createdDate desc");
         selectQueryBuilder.append(queryBuilder);
 
         Query selectQuery = entityManager.createQuery(selectQueryBuilder.toString());
-        selectQuery.setFirstResult(page*size);
+        selectQuery.setFirstResult(page * size);
         selectQuery.setMaxResults(size);
         params.forEach(selectQuery::setParameter);
 
