@@ -1,6 +1,7 @@
 package kunuz.uz.api.entity;
 
 import jakarta.persistence.*;
+import kunuz.uz.api.enums.ArticleStatus;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CurrentTimestamp;
@@ -13,11 +14,6 @@ import java.util.UUID;
 @Getter
 @Setter
 public class ArticleEntity {
-    /// 6. Article
-    ///     id(uuid),title,description,content,shared_count,image_id,
-    ///     region_id,category_id,moderator_id,publisher_id,status(Published,NotPublished)
-    ///     created_date,published_date,visible,view_count
-    ///     (Bitta article bir-nechta type da bo'lishi mumkun. Masalan Asosiy,Muharrir da.)
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -36,38 +32,47 @@ public class ArticleEntity {
     private Long sharedCount;
 
     @Column(name = "image_id")
-    private Long imageId;
+    private String imageId;
 
     @Column(name = "region_id")
     private Integer regionId;
 
-    @Column(name = "category_id")
-    private Integer categoryId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "region_id", insertable = false, updatable = false, nullable = false)
+    private RegionEntity region;
 
     @Column(name = "moderator_id")
     private Long moderatorId;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "moderator_id", insertable = false, updatable = false, nullable = false)
+    private ProfileEntity moderator;
+
     @Column(name = "publisher_id")
     private Long publisherId;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "publisher_id", insertable = false, updatable = false, nullable = false)
+    private ProfileEntity publisher;
+
+    @Column(name = "status")
+    @Enumerated(EnumType.STRING)
+    private ArticleStatus status;
+
+    @Column(name = "read_time")
+    private Integer readTime = 5;
+
     @CurrentTimestamp
-    @Column(name = "created_date")
+    @Column(name = "created_date", nullable = false)
     private LocalDateTime createdDate;
 
     @Column(name = "published_date")
     private LocalDateTime publishedDate;
 
-    @Column(name = "visible")
-    private Boolean visible;
+    @Column(name = "visible", columnDefinition = "boolean default true", nullable = false)
+    private Boolean visible = true;
 
-    @Column(name = "count")
-    private Long count;
-
-    @Column(name = "section_id")
-    private Integer sectionId;
-
-    @JoinColumn(name = "section_id", insertable = false,updatable = false,nullable = false)
-    @ManyToOne
-    private SectionEntity section;
+    @Column(name = "view_count")
+    private Long viewCount;
 
 }
