@@ -25,7 +25,7 @@ public class ProfileController {
     }
 
     //ADMIN
-    @GetMapping(value = "/byId")
+    @GetMapping(value = "/by-id")
     public ResponseEntity<ProfileResponseDTO> getById(@RequestHeader(value = "id") Long id) {
         return ResponseEntity.ok(service.getById(id));
     }

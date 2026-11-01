@@ -56,6 +56,7 @@ public class ProfileService {
         repository.save(entity);
         roleService.create(entity.getId(), dto.getRoleList());
         ProfileResponseDTO responseDTO = util.toDto(entity);
+        responseDTO.setRoleList(roleService.getAllByProfileId(entity.getId()));
         return responseDTO;
     }
 

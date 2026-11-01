@@ -1,10 +1,14 @@
 package kunuz.uz.api.controller;
 
+import kunuz.uz.api.dto.request.ArticleListDTO;
 import kunuz.uz.api.dto.request.ArticleRequestDTO;
+import kunuz.uz.api.dto.response.ArticleFullMapper;
 import kunuz.uz.api.dto.response.ArticleResponseDTO;
 import kunuz.uz.api.enums.ArticleStatus;
+import kunuz.uz.api.mapper.article.ArticleShortInfo;
 import kunuz.uz.api.service.ArticleService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,16 +19,6 @@ import java.util.UUID;
 @RequestMapping(value = "/api/v1/article")
 public class ArticleController {
 
-    //    5. Get Last N Article By sectionId  ordered_by_created_date desc
-    //        (Berilgan section (bo'lim) bo'yicha oxirgi N-ta published bo'lgan article ni return qiladi.)
-    //         (Pagination bilan ishlaydigan qilish kerak)
-    //        ArticleShortInfo
-    //    6. Get Last 12 published Article except given id list ordered_by_created_date
-    //        ([1,2,3,])
-    //        (Berilgan Article-lardan tashqarida oxirgi qo'shilgan 12-ta article-ning return qiladi.
-    //         (Article-larning id-lari kelasi, shu berilgan article-larndan tashqari bo'lgan article-larni 12-tasini return qilamiz.)
-    //         (Pagination bilan ishlaydigan qilish kerak)
-    //         ArticleShortInfo
     //   7. Get Last N Article by categoryId. (Berilgan categoryId bo'yicha eng oxirgi N-ta yangilikni return qiladi)
     //        (Pagination bilan ishlaydigan qilish kerak)
     //        ArticleShortInfo
@@ -69,13 +63,13 @@ public class ArticleController {
     private ArticleService service;
 
     @PostMapping(value = "")
-    public ResponseEntity<ArticleResponseDTO> create(@RequestHeader(value = "moderatorId")Long moderatorId,
+    public ResponseEntity<ArticleResponseDTO> create(@RequestHeader(value = "moderator-id")Long moderatorId,
                                                      @RequestBody ArticleRequestDTO dto){
         return ResponseEntity.status(HttpStatus.CREATED).body(service.create(moderatorId,dto));
     }
 
     @PutMapping(value = "")
-    public ResponseEntity<ArticleResponseDTO> update(@RequestHeader("id")UUID id,
+    public ResponseEntity<ArticleResponseDTO> update(@RequestHeader("article-id")UUID id,
                                                      @RequestBody ArticleRequestDTO dto){
         return ResponseEntity.ok(service.update(id, dto));
     }
@@ -92,18 +86,38 @@ public class ArticleController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(service.changeStatusById(articleId,publisherId, status));
     }
 
+    @GetMapping(value = "/get-by-section")
+    public ResponseEntity<Page<ArticleShortInfo>> getBySectionId(@RequestHeader(value = "section-id") Integer sectionId,
+                                                                 @RequestParam(value = "page", defaultValue = "1") int page,
+                                                                 @RequestParam(value = "size", defaultValue = "10") int size){
+        return ResponseEntity.ok(service.getBySectionId(page,size,sectionId));
+    }
 
+    @GetMapping(value = "/get-last-12")
+    public ResponseEntity<Page<ArticleShortInfo>> getLast12Except(@RequestBody ArticleListDTO dto,
+                                                                  @RequestParam(value = "page", defaultValue = "1") int page,
+                                                                  @RequestParam(value = "size", defaultValue = "12") int size){
+        return ResponseEntity.ok(service.getLast12Except(dto, page,size));
+    }
 
-    //    5. Get Last N Article By sectionId  ordered_by_created_date desc
-    //        (Berilgan section (bo'lim) bo'yicha oxirgi N-ta published bo'lgan article ni return qiladi.)
-    //         (Pagination bilan ishlaydigan qilish kerak)
-    //        ArticleShortInfo
-    //    6. Get Last 12 published Article except given id list ordered_by_created_date
-    //        ([1,2,3,])
-    //        (Berilgan Article-lardan tashqarida oxirgi qo'shilgan 12-ta article-ning return qiladi.
-    //         (Article-larning id-lari kelasi, shu berilgan article-larndan tashqari bo'lgan article-larni 12-tasini return qilamiz.)
-    //         (Pagination bilan ishlaydigan qilish kerak)
-    //         ArticleShortInfo
+    @GetMapping(value = "/get-by-category")
+    public ResponseEntity<Page<ArticleShortInfo>> getByCategoryId(@RequestHeader(value = "category-id") Integer categoryId,
+                                                                 @RequestParam(value = "page", defaultValue = "1") int page,
+                                                                 @RequestParam(value = "size", defaultValue = "10") int size){
+        return ResponseEntity.ok(service.getByCategoryId(page,size,categoryId));
+    }
 
+    @GetMapping(value = "/get-by-region")
+    public ResponseEntity<Page<ArticleFullMapper>> getByRegionId(@RequestHeader(value = "region-id") Integer regionId,
+                                                                 @RequestParam(value = "page", defaultValue = "1") int page,
+                                                                 @RequestParam(value = "size", defaultValue = "10") int size){
+        return ResponseEntity.ok(service.getByRegionId(page,size,regionId));
+    }
+
+    //    8. Get Last N Article by regionId. (Berilgan regionId bo'yicha eng oxirgi N-ta yangilikni return qiladi)
+    //        (Pagination bilan ishlaydigan qilish kerak)
+    //        ArticleFullInfo
+    //    9. Get Article By Id And Lang
+    //        ArticleFullInfo
 
 }

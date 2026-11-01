@@ -74,8 +74,11 @@ public class ArticleEntity {
     @Column(name = "visible", columnDefinition = "boolean default true", nullable = false)
     private Boolean visible = true;
 
-    @Column(name = "view_count")
+    @Column(name = "view_count", columnDefinition = "bigInt default 0")
     private Long viewCount = 0L;
+
+    @Column(name = "like_count", columnDefinition = "bigInt default 0")
+    private Long likeCount = 0L;
 
     @OneToMany(mappedBy = "article")
     private List<ArticleCategoryEntity> categoryList;

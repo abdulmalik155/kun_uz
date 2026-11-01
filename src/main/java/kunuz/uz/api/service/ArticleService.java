@@ -1,5 +1,6 @@
 package kunuz.uz.api.service;
 
+import kunuz.uz.api.dto.request.ArticleListDTO;
 import kunuz.uz.api.dto.request.ArticleRequestDTO;
 import kunuz.uz.api.dto.response.ArticleResponseDTO;
 import kunuz.uz.api.entity.ArticleEntity;
@@ -7,12 +8,19 @@ import kunuz.uz.api.enums.ArticleStatus;
 import kunuz.uz.api.enums.ProfileRole;
 import kunuz.uz.api.exceptions.ArticleExistsException;
 import kunuz.uz.api.exceptions.ArticleNotFoundException;
+import kunuz.uz.api.mapper.article.ArticleShortInfo;
 import kunuz.uz.api.repository.interfaces.ArticleRepository;
 import kunuz.uz.api.util.ArticleUtil;
+import kunuz.uz.api.util.PaginationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -81,6 +89,9 @@ public class ArticleService {
         if(existing.getPublisherId() != null && !existing.getPublisherId().equals(publisherId)){
             throw new IllegalArgumentException("Only the one who published it can change it's status");
         }
+        if(existing.getModeratorId().equals(publisherId)){
+            throw new IllegalArgumentException("Even if moderator also has publisher role he/she can't publish it at the same time");
+        }
         if(existing.getPublishedDate() == null && status.equals(ArticleStatus.NOT_PUBLISHED)){
             throw new IllegalArgumentException("It's already in not published status(it was not published at all)");
         }
@@ -94,5 +105,33 @@ public class ArticleService {
         existing.setPublisherId(publisherId);
         repository.save(existing);
         return "Status is changed successfully";
+    }
+
+    public Page<ArticleShortInfo> getBySectionId(int page, int size, Integer sectionId) {
+        //    5. Get Last N Article By sectionId  ordered_by_created_date desc
+        //        (Berilgan section (bo'lim) bo'yicha oxirgi N-ta published bo'lgan article ni return qiladi.)
+        //         (Pagination bilan ishlaydigan qilish kerak)
+        //        ArticleShortInfo
+        PaginationUtil.check(page,size);
+        page--;
+        PageRequest request = PageRequest.of(page,size, Sort.by("createdDate").descending());
+        Page<ArticleShortInfo> entities = repository.findLastNBySectionId(sectionId, request);
+        return entities;
+    }
+
+    public Page<ArticleShortInfo> getLast12Except(ArticleListDTO dto, int page, int size) {
+        PaginationUtil.check(page,size);
+        page--;
+        PageRequest request = PageRequest.of(page,size, Sort.by("createdDate").descending());
+        Page<ArticleShortInfo> entities = repository.findLast12Except(dto.getArticleIds(), request);
+        return entities;
+    }
+
+    public Page<ArticleShortInfo> getByCategoryId(int page, int size, Integer categoryId) {
+        PaginationUtil.check(page,size);
+        page--;
+        PageRequest request = PageRequest.of(page,size, Sort.by("createdDate").descending());
+        Page<ArticleShortInfo> entities = repository.findLastNByCategoryId(categoryId, request);
+        return entities;
     }
 }
