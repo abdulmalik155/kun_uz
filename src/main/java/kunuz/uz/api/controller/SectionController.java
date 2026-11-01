@@ -3,7 +3,7 @@ package kunuz.uz.api.controller;
 import kunuz.uz.api.dto.request.SectionRequestDTO;
 import kunuz.uz.api.dto.response.SectionResponseDTO;
 import kunuz.uz.api.enums.Language;
-import kunuz.uz.api.mapper.articleType.SectionShort;
+import kunuz.uz.api.mapper.section.SectionShort;
 import kunuz.uz.api.service.SectionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

@@ -6,7 +6,7 @@ import kunuz.uz.api.entity.SectionEntity;
 import kunuz.uz.api.enums.Language;
 import kunuz.uz.api.exceptions.articleType.SectionExistsException;
 import kunuz.uz.api.exceptions.articleType.SectionNotFoundException;
-import kunuz.uz.api.mapper.articleType.SectionShort;
+import kunuz.uz.api.mapper.section.SectionShort;
 import kunuz.uz.api.repository.interfaces.SectionRepository;
 import kunuz.uz.api.util.SectionUtil;
 import lombok.Getter;

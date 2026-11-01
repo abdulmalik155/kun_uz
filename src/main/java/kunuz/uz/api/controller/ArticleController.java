@@ -2,7 +2,7 @@ package kunuz.uz.api.controller;
 
 import kunuz.uz.api.dto.request.ArticleListDTO;
 import kunuz.uz.api.dto.request.ArticleRequestDTO;
-import kunuz.uz.api.dto.response.ArticleFullMapper;
+import kunuz.uz.api.dto.response.ArticleFullInfo;
 import kunuz.uz.api.dto.response.ArticleResponseDTO;
 import kunuz.uz.api.enums.ArticleStatus;
 import kunuz.uz.api.mapper.article.ArticleShortInfo;
@@ -108,15 +108,12 @@ public class ArticleController {
     }
 
     @GetMapping(value = "/get-by-region")
-    public ResponseEntity<Page<ArticleFullMapper>> getByRegionId(@RequestHeader(value = "region-id") Integer regionId,
-                                                                 @RequestParam(value = "page", defaultValue = "1") int page,
-                                                                 @RequestParam(value = "size", defaultValue = "10") int size){
+    public ResponseEntity<Page<ArticleFullInfo>> getByRegionId(@RequestHeader(value = "region-id") Integer regionId,
+                                                               @RequestParam(value = "page", defaultValue = "1") int page,
+                                                               @RequestParam(value = "size", defaultValue = "10") int size){
         return ResponseEntity.ok(service.getByRegionId(page,size,regionId));
     }
 
-    //    8. Get Last N Article by regionId. (Berilgan regionId bo'yicha eng oxirgi N-ta yangilikni return qiladi)
-    //        (Pagination bilan ishlaydigan qilish kerak)
-    //        ArticleFullInfo
     //    9. Get Article By Id And Lang
     //        ArticleFullInfo
 

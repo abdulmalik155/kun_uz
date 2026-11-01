@@ -3,6 +3,7 @@ package kunuz.uz.api.service;
 import kunuz.uz.api.dto.response.SectionResponseDTO;
 import kunuz.uz.api.entity.ArticleSectionEntity;
 import kunuz.uz.api.entity.SectionEntity;
+import kunuz.uz.api.mapper.section.SectionShort;
 import kunuz.uz.api.repository.interfaces.ArticleSectionRepository;
 import kunuz.uz.api.util.SectionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,5 +75,9 @@ public class ArticleSectionService {
         entity.setArticleId(articleId);
         entity.setSectionId(sectionId);
         repository.save(entity);
+    }
+
+    public List<SectionShort> getAllByArticleIdShort(UUID articleId) {
+        return repository.getAllByArticleIdShort(articleId);
     }
 }

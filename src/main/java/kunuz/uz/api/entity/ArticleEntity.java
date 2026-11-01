@@ -86,4 +86,7 @@ public class ArticleEntity {
     @OneToMany(mappedBy = "article")
     private List<ArticleSectionEntity> sectionList;
 
+    @OneToMany(mappedBy = "article")
+    private List<ArticleTagEntity> tagList;
+
 }

@@ -3,6 +3,7 @@ package kunuz.uz.api.repository.interfaces;
 import jakarta.transaction.Transactional;
 import kunuz.uz.api.entity.ArticleCategoryEntity;
 import kunuz.uz.api.entity.CategoryEntity;
+import kunuz.uz.api.mapper.category.CategoryShort;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -26,4 +27,12 @@ public interface ArticleCategoryRepository extends CrudRepository<ArticleCategor
     @Modifying
     @Query(value = "DELETE FROM ArticleCategoryEntity AS ac WHERE ac.articleId = ?1 ")
     void deleteByArticleId(UUID articleId);
+
+    @Query(value = "SELECT ac.id AS id, " +
+            " c.key AS key, " +
+            " c.nameUz AS name " +
+            " FROM ArticleCategoryEntity AS ac " +
+            " INNER JOIN ac.category AS c " +
+            " WHERE ac.articleId = ?1")
+    List<CategoryShort> getAllByArticleIdShort(UUID articleId);
 }

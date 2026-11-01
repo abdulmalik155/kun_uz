@@ -7,4 +7,5 @@ select * from category;
 select * from section;
 update article set visible = true where id = '42963aef-7e89-4243-ab35-e50b90434b2b';
 insert into profile_role (profile_id, role) values (172, 'ROLE_PUBLISHER');
-update article set moderator_id = 182, visible = true where id = '9178a8f2-c3e2-4916-a23b-b9cc382f7817';
+update article set region_id = 5 where id = 'c2285391-96bc-4204-aa03-897592e2cae9';
+select * from region;

@@ -1,4 +1,4 @@
-package kunuz.uz.api.mapper.articleType;
+package kunuz.uz.api.mapper.section;
 
 public interface SectionShort {
 

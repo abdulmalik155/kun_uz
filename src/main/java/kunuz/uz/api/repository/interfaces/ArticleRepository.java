@@ -12,7 +12,6 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -79,4 +78,31 @@ public interface ArticleRepository extends CrudRepository<ArticleEntity, UUID>, 
             " AND a.visible = TRUE " +
             " AND a.status = 'PUBLISHED'")
     Page<ArticleShortInfo> findLastNByCategoryId(Integer categoryId, PageRequest request);
+
+    /*@Query(value = "SELECT a.id AS id, " +
+            " a.title AS title, " +
+            " a.description AS description, " +
+            " a.content AS content, " +
+            " a.sharedCount AS sharedCount, " +
+            " a.regionId AS regionId, " +
+            " a.categoryList AS categoryList, " +
+            " a.sectionList AS sectionList, " +
+            " a.publishedDate AS publishedDate, " +
+            " a.viewCount AS viewCount, " +
+            " a.likeCount AS likeCount, " +
+            " a.tagList AS tagList " +
+            " FROM ArticleEntity AS a " +
+            " INNER JOIN a.region AS r " +
+            " WHERE r.id = ?1 " +
+            " AND a.visible = TRUE " +
+            " AND a.status = 'PUBLISHED'")
+    Page<ArticleFullInfo> findLastNByRegionId(Integer regionId, PageRequest request);*/
+
+    @Query(value = "SELECT a " +
+            " FROM ArticleEntity AS a " +
+            " INNER JOIN a.region AS r " +
+            " WHERE r.id = ?1 " +
+            " AND a.visible = TRUE " +
+            " AND a.status = 'PUBLISHED'")
+    Page<ArticleEntity> findLastNByRegionId(Integer regionId, PageRequest request);
 }

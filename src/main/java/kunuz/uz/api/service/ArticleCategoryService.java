@@ -3,6 +3,7 @@ package kunuz.uz.api.service;
 import kunuz.uz.api.dto.response.CategoryResponseDTO;
 import kunuz.uz.api.entity.ArticleCategoryEntity;
 import kunuz.uz.api.entity.CategoryEntity;
+import kunuz.uz.api.mapper.category.CategoryShort;
 import kunuz.uz.api.repository.interfaces.ArticleCategoryRepository;
 import kunuz.uz.api.util.CategoryUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,4 +76,7 @@ public class ArticleCategoryService {
             repository.save(entity);
     }
 
+    public List<CategoryShort> getAllByArticleIdShort(UUID articleId) {
+        return repository.getAllByArticleIdShort(articleId);
+    }
 }

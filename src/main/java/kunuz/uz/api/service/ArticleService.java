@@ -3,11 +3,15 @@ package kunuz.uz.api.service;
 import kunuz.uz.api.dto.request.ArticleListDTO;
 import kunuz.uz.api.dto.request.ArticleRequestDTO;
 import kunuz.uz.api.dto.response.ArticleResponseDTO;
+import kunuz.uz.api.entity.ArticleCategoryEntity;
 import kunuz.uz.api.entity.ArticleEntity;
+import kunuz.uz.api.entity.ArticleSectionEntity;
+import kunuz.uz.api.entity.ArticleTagEntity;
 import kunuz.uz.api.enums.ArticleStatus;
 import kunuz.uz.api.enums.ProfileRole;
 import kunuz.uz.api.exceptions.ArticleExistsException;
 import kunuz.uz.api.exceptions.ArticleNotFoundException;
+import kunuz.uz.api.dto.response.ArticleFullInfo;
 import kunuz.uz.api.mapper.article.ArticleShortInfo;
 import kunuz.uz.api.repository.interfaces.ArticleRepository;
 import kunuz.uz.api.util.ArticleUtil;
@@ -20,6 +24,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -41,6 +46,10 @@ public class ArticleService {
 
     @Autowired
     private ProfileRoleService roleService;
+
+    @Autowired
+    private ArticleTagService tagService;
+
     public ArticleResponseDTO create(Long moderatorId, ArticleRequestDTO dto) {
         Optional<ArticleEntity> existsOptional = repository.findDuplicate(moderatorId,
                 dto.getRegionId(),
@@ -133,5 +142,29 @@ public class ArticleService {
         PageRequest request = PageRequest.of(page,size, Sort.by("createdDate").descending());
         Page<ArticleShortInfo> entities = repository.findLastNByCategoryId(categoryId, request);
         return entities;
+    }
+
+    public Page<ArticleFullInfo> getByRegionId(int page, int size, Integer regionId) {
+        PaginationUtil.check(page,size);
+        page--;
+        PageRequest request = PageRequest.of(page,size, Sort.by("createdDate").descending());
+        Page<ArticleEntity> entities = repository.findLastNByRegionId(regionId, request);
+        List<ArticleFullInfo> list = new LinkedList<>();
+        for (ArticleEntity entity : entities) {
+            ArticleFullInfo info = new ArticleFullInfo();
+            info.setId(entity.getId());
+            info.setTitle(entity.getTitle());
+            info.setDescription(entity.getDescription());
+            info.setContent(entity.getContent());
+            info.setSharedCount(entity.getSharedCount());
+            info.setRegionId(entity.getRegionId());
+            info.setCategoryList(categoryService.getAllByArticleIdShort(entity.getId()));
+            info.setSectionList(sectionService.getAllByArticleIdShort(entity.getId()));
+            info.setViewCount(entity.getViewCount());
+            info.setLikeCount(entity.getLikeCount());
+            info.setTagList(tagService.getAllByArticleIdShort(entity.getId()));
+            list.add(info);
+        }
+        return new PageImpl<>(list, entities.getPageable(), entities.getTotalElements());
     }
 }
