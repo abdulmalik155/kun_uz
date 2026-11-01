@@ -12,6 +12,7 @@ import kunuz.uz.api.util.ArticleUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -73,12 +74,21 @@ public class ArticleService {
     }
 
     public String changeStatusById(UUID articleId, Long publisherId, ArticleStatus status) {
+        ArticleEntity existing = getOrThrow(articleId);
         if(!roleService.getAllByProfileId(publisherId).contains(ProfileRole.ROLE_PUBLISHER)){
             throw new IllegalArgumentException("This is not publisher");
         }
-        ArticleEntity existing = getOrThrow(articleId);
         if(existing.getPublisherId() != null && !existing.getPublisherId().equals(publisherId)){
             throw new IllegalArgumentException("Only the one who published it can change it's status");
+        }
+        if(existing.getPublishedDate() == null && status.equals(ArticleStatus.NOT_PUBLISHED)){
+            throw new IllegalArgumentException("It's already in not published status(it was not published at all)");
+        }
+        if(status.equals(ArticleStatus.PUBLISHED) && existing.getPublishedDate() != null && existing.getStatus().equals(ArticleStatus.PUBLISHED)){
+            throw new IllegalArgumentException("Kallavaram! it's already published");
+        }
+        if(status.equals(ArticleStatus.PUBLISHED)){
+            existing.setPublishedDate(LocalDateTime.now());
         }
         existing.setStatus(status);
         existing.setPublisherId(publisherId);

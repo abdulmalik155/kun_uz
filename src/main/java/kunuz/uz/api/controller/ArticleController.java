@@ -93,4 +93,17 @@ public class ArticleController {
     }
 
 
+
+    //    5. Get Last N Article By sectionId  ordered_by_created_date desc
+    //        (Berilgan section (bo'lim) bo'yicha oxirgi N-ta published bo'lgan article ni return qiladi.)
+    //         (Pagination bilan ishlaydigan qilish kerak)
+    //        ArticleShortInfo
+    //    6. Get Last 12 published Article except given id list ordered_by_created_date
+    //        ([1,2,3,])
+    //        (Berilgan Article-lardan tashqarida oxirgi qo'shilgan 12-ta article-ning return qiladi.
+    //         (Article-larning id-lari kelasi, shu berilgan article-larndan tashqari bo'lgan article-larni 12-tasini return qilamiz.)
+    //         (Pagination bilan ishlaydigan qilish kerak)
+    //         ArticleShortInfo
+
+
 }
