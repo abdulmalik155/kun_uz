@@ -9,6 +9,7 @@ import kunuz.uz.api.exceptions.articleType.SectionNotFoundException;
 import kunuz.uz.api.mapper.articleType.SectionShort;
 import kunuz.uz.api.repository.interfaces.SectionRepository;
 import kunuz.uz.api.util.SectionUtil;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Getter
 public class SectionService {
 
     @Autowired

@@ -9,6 +9,7 @@ import kunuz.uz.api.exceptions.category.CategoryNotFoundException;
 import kunuz.uz.api.mapper.category.CategoryShort;
 import kunuz.uz.api.repository.interfaces.CategoryRepository;
 import kunuz.uz.api.util.CategoryUtil;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Getter
 public class CategoryService {
 
     @Autowired
