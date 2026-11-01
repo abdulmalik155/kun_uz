@@ -53,6 +53,8 @@ public class ProfileRoleService {
     }
 
     public List<ProfileRole> getAllByProfileId(Long id) {
-        return repository.findAllByProfileId(id);
+        List<ProfileRole> list = repository.findAllByProfileId(id);
+        list.forEach(profileRole -> System.out.println(profileRole.toString()));
+        return list;
     }
 }

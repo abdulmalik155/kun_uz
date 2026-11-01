@@ -13,7 +13,7 @@ import java.util.List;
 @Repository
 public interface ProfileRoleRepository extends CrudRepository<ProfileRoleEntity, Integer> {
 
-    @Query(value = "SELECT pr.role FROM ProfileRoleEntity AS pr WHERE pr.profileId = ?1")
+    @Query(value = "SELECT pr.role FROM ProfileRoleEntity AS pr inner join pr.profile as p WHERE pr.profileId = ?1 and p.visible = true")
     List<ProfileRole> findAllByProfileId(Long profileId);
 
     @Modifying

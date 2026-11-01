@@ -2,6 +2,7 @@ package kunuz.uz.api.controller;
 
 import kunuz.uz.api.dto.request.ArticleRequestDTO;
 import kunuz.uz.api.dto.response.ArticleResponseDTO;
+import kunuz.uz.api.enums.ArticleStatus;
 import kunuz.uz.api.service.ArticleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,18 +15,6 @@ import java.util.UUID;
 @RequestMapping(value = "/api/v1/article")
 public class ArticleController {
 
-    //   1. CREATE (Moderator) status(NotPublished)
-    //        Request: (title,description,content,imageId, regionId, categoryList[{id},{id}], sectionList[{id},{id}] )
-    //        Response: ArticleInfoDTO
-    //    2. Update (Moderator (status to not publish)) (remove old image)
-    //        Request: (title,description,content,imageId, regionId, categoryList[], sectionList[])
-    //        Response: ArticleInfoDTO
-    //    3. Delete Article (MODERATOR)
-    //        Request: id
-    //        Response: "Message"
-    //    4. Change status by id (PUBLISHER) (publish,not_publish)
-    //        Request: id, (status)
-    //        Response: "Message"
     //    5. Get Last N Article By sectionId  ordered_by_created_date desc
     //        (Berilgan section (bo'lim) bo'yicha oxirgi N-ta published bo'lgan article ni return qiladi.)
     //         (Pagination bilan ishlaydigan qilish kerak)
@@ -76,15 +65,13 @@ public class ArticleController {
     //    id(uuid),title,description,content,shared_count,
     //        region(key,name),categoryList[{key,name},{}], sectionList[{id,name},{id,name}] published_date,view_count,like_count,
     //        tagList[name,name]
-    //   1. CREATE (Moderator) status(NotPublished)
-    //        Request: (title,description,content,imageId, regionId, categoryList[{id},{id}], sectionList[{id},{id}] )
-    //        Response: ArticleInfoDTO
     @Autowired
     private ArticleService service;
 
     @PostMapping(value = "")
-    public ResponseEntity<ArticleResponseDTO> create(@RequestBody ArticleRequestDTO dto){
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(dto));
+    public ResponseEntity<ArticleResponseDTO> create(@RequestHeader(value = "moderatorId")Long moderatorId,
+                                                     @RequestBody ArticleRequestDTO dto){
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(moderatorId,dto));
     }
 
     @PutMapping(value = "")
@@ -92,15 +79,18 @@ public class ArticleController {
                                                      @RequestBody ArticleRequestDTO dto){
         return ResponseEntity.ok(service.update(id, dto));
     }
-    //    2. Update (Moderator (status to not publish)) (remove old image)
-    //        Request: (title,description,content,imageId, regionId, categoryList[], sectionList[])
-    //        Response: ArticleInfoDTO
-    //    3. Delete Article (MODERATOR)
-    //        Request: id
-    //        Response: "Message"
-    //    4. Change status by id (PUBLISHER) (publish,not_publish)
-    //        Request: id, (status)
-    //        Response: "Message"
+
+    @DeleteMapping(value = "")
+    public ResponseEntity<?> delete(@RequestHeader("id") UUID id){
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(service.delete(id));
+    }
+
+    @PutMapping(value = "/update-status")
+    public ResponseEntity<?> changeStatusById(@RequestHeader("article-id") UUID articleId,
+                                              @RequestHeader("publisher-id") Long publisherId,
+                                              @RequestParam("status") ArticleStatus status){
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(service.changeStatusById(articleId,publisherId, status));
+    }
 
 
 }
