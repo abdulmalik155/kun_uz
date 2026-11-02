@@ -9,3 +9,4 @@ update article set visible = true where id = '42963aef-7e89-4243-ab35-e50b90434b
 insert into profile_role (profile_id, role) values (172, 'ROLE_PUBLISHER');
 update article set region_id = 5 where id = 'c2285391-96bc-4204-aa03-897592e2cae9';
 select * from region;
+    select * from article_tag;

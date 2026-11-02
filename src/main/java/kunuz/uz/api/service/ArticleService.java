@@ -175,4 +175,17 @@ public class ArticleService {
         ArticleEntity existing = getOrThrow(articleId);
         return toFullInfo(existing, language.toString());
     }
+
+    public Page<ArticleFullInfo> getByTag(int page, int size, String name) {
+        PaginationUtil.check(page,size);
+        page--;
+        PageRequest request = PageRequest.of(page,size, Sort.by("createdDate").descending());
+        Page<ArticleEntity> entities = repository.findLastNByTag(name, request);
+        List<ArticleFullInfo> list = new LinkedList<>();
+        for (ArticleEntity entity : entities.getContent()) {
+            ArticleFullInfo info = toFullInfo(entity, Language.UZ.toString());
+            list.add(info);
+        }
+        return new PageImpl<>(list, entities.getPageable(), entities.getTotalElements());
+    }
 }

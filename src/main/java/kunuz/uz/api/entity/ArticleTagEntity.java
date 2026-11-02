@@ -23,7 +23,11 @@ public class ArticleTagEntity {
     @JoinColumn(name = "article_id", insertable = false, updatable = false, nullable = false)
     private ArticleEntity article;
 
-    @Column(name = "name", nullable = false, unique = true)
-    private String name;
+    @Column(name = "tag_id")
+    private Integer tagId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tag_id", insertable = false, updatable = false, nullable = false)
+    private TagEntity tag;
 
 }

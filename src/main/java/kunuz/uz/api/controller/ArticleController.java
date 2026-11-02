@@ -20,17 +20,6 @@ import java.util.UUID;
 @RequestMapping(value = "/api/v1/article")
 public class ArticleController {
 
-    //   7. Get Last N Article by categoryId. (Berilgan categoryId bo'yicha eng oxirgi N-ta yangilikni return qiladi)
-    //        (Pagination bilan ishlaydigan qilish kerak)
-    //        ArticleShortInfo
-    //    8. Get Last N Article by regionId. (Berilgan regionId bo'yicha eng oxirgi N-ta yangilikni return qiladi)
-    //        (Pagination bilan ishlaydigan qilish kerak)
-    //        ArticleFullInfo
-    //    9. Get Article By Id And Lang
-    //        ArticleFullInfo
-    //    10. Get Last N Article By TagName (Berilgan tag nomi bo'yicha oxirgi N-ta yangilikni return qiladi)
-    //        (Pagination bilan ishlaydigan qilish kerak)
-    //        ArticleShortInfo
     //    11. Get Last 4 Article By sectionId, except given article id.
     //        (Berilgan SectionId bo'yicha oxirgi 4-ta maqolani return qiladi. Berilgan maqolaning id-sidan tash)
     //        ArticleShortInfo
@@ -94,7 +83,7 @@ public class ArticleController {
         return ResponseEntity.ok(service.getBySectionId(page, size, sectionId));
     }
 
-    @GetMapping(value = "/last-12")
+    @PostMapping(value = "/last-12")
     public ResponseEntity<Page<ArticleShortInfo>> getLast12Except(@RequestBody ArticleListDTO dto,
                                                                   @RequestParam(value = "page", defaultValue = "1") int page,
                                                                   @RequestParam(value = "size", defaultValue = "12") int size) {
@@ -120,5 +109,16 @@ public class ArticleController {
                                                                        @RequestHeader(value = "Accept-Language") Language language) {
         return ResponseEntity.ok(service.getByIdAndLang( articleId,language));
     }
+
+    @GetMapping(value = "/by-tag")
+    public ResponseEntity<Page<ArticleFullInfo>> getByTag(@RequestParam(value = "tag-name") String name,
+                                                          @RequestParam(value = "page", defaultValue = "1") int page,
+                                                          @RequestParam(value = "size", defaultValue = "10") int size){
+        return ResponseEntity.ok(service.getByTag(page,size, name));
+    }
+
+    //    10. Get Last N Article By TagName (Berilgan tag nomi bo'yicha oxirgi N-ta yangilikni return qiladi)
+    //        (Pagination bilan ishlaydigan qilish kerak)
+    //        ArticleShortInfo
 
 }

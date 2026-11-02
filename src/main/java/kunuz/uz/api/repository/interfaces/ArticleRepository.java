@@ -91,6 +91,13 @@ public interface ArticleRepository extends CrudRepository<ArticleEntity, UUID>, 
             " AND a.status = 'PUBLISHED'")
     Page<ArticleEntity> findLastNByRegionId(Integer regionId, PageRequest request);
 
+    @Query(value = "SELECT a " +
+            " FROM ArticleEntity AS a " +
+            " INNER JOIN a.tagList AS tag " +
+            " WHERE a.visible = TRUE " +
+            " AND tag.name = ?1")
+    Page<ArticleEntity> findLastNByTag(String name, PageRequest request);
+
 //    @Query(value = "SELECT a " +
 //            " FROM ArticleEntity AS a " +
 //            " INNER JOIN a.categoryList AS category " +
