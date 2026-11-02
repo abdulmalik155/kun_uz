@@ -17,10 +17,6 @@ import java.util.UUID;
 @Getter
 @Setter
 public class ArticleFullInfo {
-    //   ArticleFullInfo
-    //    id(uuid),title,description,content,shared_count,
-    //        region(key,name),categoryList[{key,name},{}], sectionList[{id,name},{id,name}] published_date,view_count,like_count,
-    //        tagList[name,name]
     private UUID id;
 
     private String title;

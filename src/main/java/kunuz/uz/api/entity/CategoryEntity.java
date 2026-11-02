@@ -13,8 +13,6 @@ import java.time.LocalDateTime;
 @Setter
 
 public class CategoryEntity {
-//4. Category(O'zbekiston, Jahon, Iksodiyot, Sport, Audio, Video, Jamiyat)
-//    id,order_number,nameUz, nameRu, nameEn, key, visible,created_date
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;

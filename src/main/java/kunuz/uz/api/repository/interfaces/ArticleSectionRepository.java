@@ -3,10 +3,12 @@ package kunuz.uz.api.repository.interfaces;
 import jakarta.transaction.Transactional;
 import kunuz.uz.api.entity.ArticleSectionEntity;
 import kunuz.uz.api.entity.SectionEntity;
+import kunuz.uz.api.mapper.category.CategoryShort;
 import kunuz.uz.api.mapper.section.SectionShort;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -35,4 +37,20 @@ public interface ArticleSectionRepository extends CrudRepository<ArticleSectionE
             " INNER JOIN s.section AS sn" +
             " WHERE s.articleId = ?1")
     List<SectionShort> getAllByArticleIdShort(UUID articleId);
+
+    @Query(value = "SELECT section.id AS id, " +
+            " section.key AS key, " +
+            " (CASE :lang " +
+            "      WHEN 'UZ' THEN section.nameUz " +
+            "      WHEN 'RU' THEN section.nameRu " +
+            "      WHEN 'EN' THEN section.nameEn " +
+            "           ELSE section.nameUz " +
+            "      END " +
+            ") AS name " +
+            " FROM ArticleSectionEntity AS ac " +
+            " INNER JOIN ac.section AS section" +
+            " WHERE ac.articleId = :article_id ")
+    List<SectionShort> findAllByArticleIdAndLang(@Param(value = "article_id") UUID articleId,
+                                                  @Param(value = "lang") String language);
+
 }

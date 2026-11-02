@@ -3,11 +3,9 @@ package kunuz.uz.api.service;
 import kunuz.uz.api.dto.request.ArticleListDTO;
 import kunuz.uz.api.dto.request.ArticleRequestDTO;
 import kunuz.uz.api.dto.response.ArticleResponseDTO;
-import kunuz.uz.api.entity.ArticleCategoryEntity;
 import kunuz.uz.api.entity.ArticleEntity;
-import kunuz.uz.api.entity.ArticleSectionEntity;
-import kunuz.uz.api.entity.ArticleTagEntity;
 import kunuz.uz.api.enums.ArticleStatus;
+import kunuz.uz.api.enums.Language;
 import kunuz.uz.api.enums.ProfileRole;
 import kunuz.uz.api.exceptions.ArticleExistsException;
 import kunuz.uz.api.exceptions.ArticleNotFoundException;
@@ -16,6 +14,7 @@ import kunuz.uz.api.mapper.article.ArticleShortInfo;
 import kunuz.uz.api.repository.interfaces.ArticleRepository;
 import kunuz.uz.api.util.ArticleUtil;
 import kunuz.uz.api.util.PaginationUtil;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -72,17 +71,20 @@ public class ArticleService {
     }
 
 
-    public ArticleResponseDTO update(UUID id, ArticleRequestDTO dto) {
-        ArticleEntity existing = getOrThrow(id);
+    public ArticleResponseDTO update(UUID articleId, ArticleRequestDTO dto) {
+        ArticleEntity existing = getOrThrow(articleId);
         ArticleEntity updated = repository.save(util.toEntity(dto, existing));
-        categoryService.merge(id, dto.getCategoryList());
-        sectionService.merge(id, dto.getSectionList());
+        categoryService.merge(articleId, dto.getCategoryList());
+        sectionService.merge(articleId, dto.getSectionList());
         ArticleResponseDTO response = util.toDto(updated);
         return response;
     }
 
     public ArticleEntity getOrThrow(UUID id) {
-        return repository.findByIdVisibleTrue(id).orElseThrow(() -> new ArticleNotFoundException("Article not found"));
+        return repository.findByIdVisibleTrue(id)
+                .orElseThrow(
+                        () -> new ArticleNotFoundException("Article not found")
+                );
     }
 
     public String delete(UUID id) {
@@ -117,10 +119,6 @@ public class ArticleService {
     }
 
     public Page<ArticleShortInfo> getBySectionId(int page, int size, Integer sectionId) {
-        //    5. Get Last N Article By sectionId  ordered_by_created_date desc
-        //        (Berilgan section (bo'lim) bo'yicha oxirgi N-ta published bo'lgan article ni return qiladi.)
-        //         (Pagination bilan ishlaydigan qilish kerak)
-        //        ArticleShortInfo
         PaginationUtil.check(page,size);
         page--;
         PageRequest request = PageRequest.of(page,size, Sort.by("createdDate").descending());
@@ -150,21 +148,31 @@ public class ArticleService {
         PageRequest request = PageRequest.of(page,size, Sort.by("createdDate").descending());
         Page<ArticleEntity> entities = repository.findLastNByRegionId(regionId, request);
         List<ArticleFullInfo> list = new LinkedList<>();
-        for (ArticleEntity entity : entities) {
-            ArticleFullInfo info = new ArticleFullInfo();
-            info.setId(entity.getId());
-            info.setTitle(entity.getTitle());
-            info.setDescription(entity.getDescription());
-            info.setContent(entity.getContent());
-            info.setSharedCount(entity.getSharedCount());
-            info.setRegionId(entity.getRegionId());
-            info.setCategoryList(categoryService.getAllByArticleIdShort(entity.getId()));
-            info.setSectionList(sectionService.getAllByArticleIdShort(entity.getId()));
-            info.setViewCount(entity.getViewCount());
-            info.setLikeCount(entity.getLikeCount());
-            info.setTagList(tagService.getAllByArticleIdShort(entity.getId()));
+        for (ArticleEntity entity : entities.getContent()) {
+            ArticleFullInfo info = toFullInfo(entity, Language.UZ.toString());
             list.add(info);
         }
         return new PageImpl<>(list, entities.getPageable(), entities.getTotalElements());
+    }
+
+    private ArticleFullInfo toFullInfo(ArticleEntity entity, String language) {
+        ArticleFullInfo info = new ArticleFullInfo();
+        info.setId(entity.getId());
+        info.setTitle(entity.getTitle());
+        info.setDescription(entity.getDescription());
+        info.setContent(entity.getContent());
+        info.setSharedCount(entity.getSharedCount());
+        info.setRegionId(entity.getRegionId());
+        info.setCategoryList(categoryService.findAllByArticleIdAndLang(entity.getId(), language));
+        info.setSectionList(sectionService.findAllByArticleIdAndLang(entity.getId(), language));
+        info.setViewCount(entity.getViewCount());
+        info.setLikeCount(entity.getLikeCount());
+        info.setTagList(tagService.getAllByArticleIdShort(entity.getId()));
+        return info;
+    }
+
+    public ArticleFullInfo getByIdAndLang( UUID articleId, Language language) {
+        ArticleEntity existing = getOrThrow(articleId);
+        return toFullInfo(existing, language.toString());
     }
 }

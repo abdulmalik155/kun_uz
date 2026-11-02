@@ -79,4 +79,8 @@ public class ArticleCategoryService {
     public List<CategoryShort> getAllByArticleIdShort(UUID articleId) {
         return repository.getAllByArticleIdShort(articleId);
     }
+
+    public List<CategoryShort> findAllByArticleIdAndLang(UUID articleId, String language){
+        return repository.findAllByArticleIdAndLang(articleId, language);
+    }
 }
