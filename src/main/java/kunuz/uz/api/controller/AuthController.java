@@ -3,6 +3,7 @@ package kunuz.uz.api.controller;
 
 import jakarta.validation.Valid;
 import kunuz.uz.api.dto.AuthorizationDTO;
+import kunuz.uz.api.dto.ConfirmationDTO;
 import kunuz.uz.api.dto.request.RegistrationDTO;
 import kunuz.uz.api.dto.response.ProfileResponseDTO;
 import kunuz.uz.api.service.AuthService;
@@ -30,4 +31,9 @@ public class AuthController {
         return ResponseEntity.ok(service.login(dto));
     }
 
+    @PostMapping("/confirm")
+    public ResponseEntity<?>  confirmation(@Valid @RequestBody ConfirmationDTO dto){
+        service.confirm(dto);
+        return ResponseEntity.ok().build();
+    }
 }

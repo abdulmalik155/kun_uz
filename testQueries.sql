@@ -5,3 +5,4 @@ select * from article_category;
 select * from article_section;
 select * from tag;
 drop table if exists tag_article_tag_list;
+select * from email_history;
