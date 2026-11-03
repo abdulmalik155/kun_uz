@@ -14,7 +14,6 @@ import kunuz.uz.api.mapper.article.ArticleShortInfo;
 import kunuz.uz.api.repository.interfaces.ArticleRepository;
 import kunuz.uz.api.util.ArticleUtil;
 import kunuz.uz.api.util.PaginationUtil;
-import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -66,6 +65,7 @@ public class ArticleService {
         repository.save(newArticle);
         categoryService.create(newArticle.getId(), dto.getCategoryList());
         sectionService.create(newArticle.getId(), dto.getSectionList());
+        tagService.create(newArticle.getId(), dto.getTagList());
         ArticleResponseDTO response = util.toDto(newArticle);
         return response;
     }
@@ -76,6 +76,7 @@ public class ArticleService {
         ArticleEntity updated = repository.save(util.toEntity(dto, existing));
         categoryService.merge(articleId, dto.getCategoryList());
         sectionService.merge(articleId, dto.getSectionList());
+        tagService.merge(articleId,dto.getTagList());
         ArticleResponseDTO response = util.toDto(updated);
         return response;
     }
@@ -176,11 +177,11 @@ public class ArticleService {
         return toFullInfo(existing, language.toString());
     }
 
-    public Page<ArticleFullInfo> getByTag(int page, int size, String name) {
+    public Page<ArticleFullInfo> getByTagName(int page, int size, String name) {
         PaginationUtil.check(page,size);
         page--;
         PageRequest request = PageRequest.of(page,size, Sort.by("createdDate").descending());
-        Page<ArticleEntity> entities = repository.findLastNByTag(name, request);
+        Page<ArticleEntity> entities = repository.findLastNByTagName(name.trim(), request);
         List<ArticleFullInfo> list = new LinkedList<>();
         for (ArticleEntity entity : entities.getContent()) {
             ArticleFullInfo info = toFullInfo(entity, Language.UZ.toString());

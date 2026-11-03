@@ -35,4 +35,8 @@ public class ArticleRequestDTO {
 
     @NotEmpty(message = "Section id(s) is/are required ")
     private List<Integer> sectionList;
+
+    @NotEmpty(message = "Tag id(s) is/are required")
+    private List<Integer> tagList;
+
 }

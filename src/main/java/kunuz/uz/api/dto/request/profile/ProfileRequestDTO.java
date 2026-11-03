@@ -10,6 +10,8 @@ import lombok.Setter;
 @Setter
 public class ProfileRequestDTO extends ProfileUpdateDTO {
 
+
+
     @NotBlank(message = "Password is required")
     @Size(min = 8, max = 255, message = "minimum length of password is 8 characters")
     private String password;

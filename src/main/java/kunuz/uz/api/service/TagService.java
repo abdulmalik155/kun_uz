@@ -17,8 +17,17 @@ public class TagService {
     private TagRepository repository;
 
     public void create(TagRequestDTO dto) {
+        String name = dto.getName();
+        name = name.replaceAll("[^#]", "");
+        if(name.length() > 1){
+            throw new IllegalArgumentException("Invalid tag name");
+        }
+        if(repository.findByName(dto.getName().trim()).isPresent()){
+            throw new IllegalArgumentException("This tag already exists");
+        }
+
         TagEntity entity = new TagEntity();
-        entity.setName(dto.getName());
+        entity.setName(dto.getName().trim());
         repository.save(entity);
     }
 

@@ -5,6 +5,7 @@ import kunuz.uz.api.dto.response.ArticleResponseDTO;
 import kunuz.uz.api.entity.ArticleEntity;
 import kunuz.uz.api.service.ArticleCategoryService;
 import kunuz.uz.api.service.ArticleSectionService;
+import kunuz.uz.api.service.ArticleTagService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +20,9 @@ public class ArticleUtil implements  BaseEntityUtil<ArticleRequestDTO, ArticleRe
 
     @Autowired
     private ArticleSectionService sectionService;
+
+    @Autowired
+    private ArticleTagService tagService;
 
     @Override
     public ArticleEntity toEntity(ArticleRequestDTO dto, ArticleEntity entity) {
@@ -43,6 +47,7 @@ public class ArticleUtil implements  BaseEntityUtil<ArticleRequestDTO, ArticleRe
         dto.setCreatedDate(entity.getCreatedDate());
         dto.setCategoryList(categoryService.getAllDTOByArticleId(entity.getId()));
         dto.setSectionList(sectionService.getAllDTOByArticleId(entity.getId()));
+        dto.setTagList(tagService.getAllDTOByArticleId(entity.getId()));
         return dto;
     }
 

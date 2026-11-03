@@ -27,15 +27,18 @@ public interface ArticleSectionRepository extends CrudRepository<ArticleSectionE
     @Query(value = "DELETE FROM ArticleSectionEntity AS a WHERE a.articleId = ?1 ")
     void deleteByArticleId(UUID articleId);
 
-    @Query(value = "SELECT a.section FROM ArticleSectionEntity AS a WHERE a.articleId = ?1 ")
+    @Query(value = "SELECT sn " +
+            " FROM ArticleSectionEntity AS a " +
+            " INNER JOIN a.section AS sn " +
+            " WHERE a.articleId = ?1 ")
     List<SectionEntity> findAllByArticleId(UUID articleId);
 
-    @Query(value = "SELECT s.id AS id, " +
+    @Query(value = "SELECT sn.id AS id, " +
             " sn.key AS key, " +
             " sn.nameUz AS name " +
-            " FROM ArticleSectionEntity AS s  " +
-            " INNER JOIN s.section AS sn" +
-            " WHERE s.articleId = ?1")
+            " FROM ArticleSectionEntity AS a  " +
+            " INNER JOIN a.section AS sn" +
+            " WHERE a.articleId = ?1")
     List<SectionShort> getAllByArticleIdShort(UUID articleId);
 
     @Query(value = "SELECT section.id AS id, " +

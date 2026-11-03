@@ -2,10 +2,9 @@ package kunuz.uz.api.repository.interfaces;
 
 import jakarta.transaction.Transactional;
 import kunuz.uz.api.entity.ArticleEntity;
-import kunuz.uz.api.enums.Language;
 import kunuz.uz.api.mapper.article.ArticleShortInfo;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -57,7 +56,7 @@ public interface ArticleRepository extends CrudRepository<ArticleEntity, UUID>, 
             " WHERE s.sectionId = ?1 " +
             " AND a.visible = TRUE " +
             " AND a.status = 'PUBLISHED'")
-    Page<ArticleShortInfo> findLastNBySectionId(Integer sectionId, PageRequest request);
+    Page<ArticleShortInfo> findLastNBySectionId(Integer sectionId, Pageable request);
 
 
     @Query(value = "SELECT a.id AS id, " +
@@ -69,7 +68,7 @@ public interface ArticleRepository extends CrudRepository<ArticleEntity, UUID>, 
             " WHERE a.status = 'PUBLISHED' " +
             " AND a.visible = TRUE " +
             " AND a.id NOT IN ?1 ")
-    Page<ArticleShortInfo> findLast12Except(List<UUID> articleIds, PageRequest request);
+    Page<ArticleShortInfo> findLast12Except(List<UUID> articleIds, Pageable request);
 
     @Query(value = "SELECT a.id AS id, " +
             " a.title AS title, " +
@@ -81,7 +80,7 @@ public interface ArticleRepository extends CrudRepository<ArticleEntity, UUID>, 
             " WHERE c.categoryId = ?1 " +
             " AND a.visible = TRUE " +
             " AND a.status = 'PUBLISHED'")
-    Page<ArticleShortInfo> findLastNByCategoryId(Integer categoryId, PageRequest request);
+    Page<ArticleShortInfo> findLastNByCategoryId(Integer categoryId, Pageable request);
 
     @Query(value = "SELECT a " +
             " FROM ArticleEntity AS a " +
@@ -89,14 +88,15 @@ public interface ArticleRepository extends CrudRepository<ArticleEntity, UUID>, 
             " WHERE r.id = ?1 " +
             " AND a.visible = TRUE " +
             " AND a.status = 'PUBLISHED'")
-    Page<ArticleEntity> findLastNByRegionId(Integer regionId, PageRequest request);
+    Page<ArticleEntity> findLastNByRegionId(Integer regionId, Pageable request);
 
     @Query(value = "SELECT a " +
             " FROM ArticleEntity AS a " +
-            " INNER JOIN a.tagList AS tag " +
+            " INNER JOIN ArticleTagEntity AS articleTag ON articleTag.articleId = a.id " +
+            " INNER JOIN TagEntity AS tag ON articleTag.tagId = tag.id " +
             " WHERE a.visible = TRUE " +
             " AND tag.name = ?1")
-    Page<ArticleEntity> findLastNByTag(String name, PageRequest request);
+    Page<ArticleEntity> findLastNByTagName(String name, Pageable request);
 
 //    @Query(value = "SELECT a " +
 //            " FROM ArticleEntity AS a " +
@@ -106,5 +106,5 @@ public interface ArticleRepository extends CrudRepository<ArticleEntity, UUID>, 
 //            " WHERE a.id = :articleId AND a.visible = TRUE")
 //    Page<ArticleEntity> findLastNByIdAndLang(@Param(value = "articleId") UUID articleId,
 //                                             @Param(value = "lang") String language,
-//                                             PageRequest request);
+//                                             Pageable request);
 }

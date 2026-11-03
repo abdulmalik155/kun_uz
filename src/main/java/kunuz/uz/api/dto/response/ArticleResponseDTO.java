@@ -28,4 +28,6 @@ public class ArticleResponseDTO {
     private List<SectionResponseDTO> sectionList;
 
     private LocalDateTime createdDate;
+
+    private List<TagResponseDTO> tagList;
 }

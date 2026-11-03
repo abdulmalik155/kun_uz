@@ -4,5 +4,5 @@ public interface TagShort {
 
     Integer getId();
 
-    String name();
+    String getName();
 }

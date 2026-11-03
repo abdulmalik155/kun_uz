@@ -2,6 +2,7 @@ package kunuz.uz.api.repository.interfaces;
 
 
 import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.NotBlank;
 import kunuz.uz.api.entity.ProfileEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,4 +28,5 @@ public interface ProfileRepository extends CrudRepository<ProfileEntity, Long>, 
 
     @Query(value = "SELECT p FROM ProfileEntity AS p INNER JOIN FETCH p.roleList WHERE p.visible = TRUE")
     Page<ProfileEntity> findAllWithRole(Pageable pageable);
+
 }

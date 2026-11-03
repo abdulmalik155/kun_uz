@@ -110,11 +110,11 @@ public class ArticleController {
         return ResponseEntity.ok(service.getByIdAndLang( articleId,language));
     }
 
-    @GetMapping(value = "/by-tag")
-    public ResponseEntity<Page<ArticleFullInfo>> getByTag(@RequestParam(value = "tag-name") String name,
+    @GetMapping(value = "/by-tag-name")
+    public ResponseEntity<Page<ArticleFullInfo>> getByTagName(@RequestHeader(value = "tag-name") String name,
                                                           @RequestParam(value = "page", defaultValue = "1") int page,
                                                           @RequestParam(value = "size", defaultValue = "10") int size){
-        return ResponseEntity.ok(service.getByTag(page,size, name));
+        return ResponseEntity.ok(service.getByTagName(page,size, name));
     }
 
     //    10. Get Last N Article By TagName (Berilgan tag nomi bo'yicha oxirgi N-ta yangilikni return qiladi)

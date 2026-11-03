@@ -16,8 +16,9 @@ import java.util.UUID;
 @Repository
 public interface ArticleCategoryRepository extends CrudRepository<ArticleCategoryEntity, Integer> {
 
-    @Query(value = "SELECT ac.category " +
+    @Query(value = "SELECT c " +
             " FROM ArticleCategoryEntity AS ac " +
+            " INNER JOIN ac.category AS c " +
             " WHERE ac.articleId = ?1 ")
     List<CategoryEntity> findAllByArticleId(UUID articleId);
 
@@ -34,7 +35,7 @@ public interface ArticleCategoryRepository extends CrudRepository<ArticleCategor
     @Query(value = "DELETE FROM ArticleCategoryEntity AS ac WHERE ac.articleId = ?1 ")
     void deleteByArticleId(UUID articleId);
 
-    @Query(value = "SELECT ac.id AS id, " +
+    @Query(value = "SELECT c.id AS id, " +
             " c.key AS key, " +
             " c.nameUz AS name " +
             " FROM ArticleCategoryEntity AS ac " +
