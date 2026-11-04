@@ -13,6 +13,8 @@ import kunuz.uz.api.entity.EmailHistoryEntity;
 import kunuz.uz.api.entity.ProfileEntity;
 import kunuz.uz.api.enums.ProfileRole;
 import kunuz.uz.api.enums.ProfileStatus;
+import kunuz.uz.api.exceptions.AppBadException;
+import kunuz.uz.api.exceptions.profile.ProfileExistsException;
 import kunuz.uz.api.repository.interfaces.ProfileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -43,35 +45,10 @@ public class AuthService {
     private EmailHistoryService emailHistoryService;
 
     public String registration(RegistrationDTO dto) {
-        // check
-        Optional<ProfileEntity> existOptional = profileRepository.findByUsername(dto.getUsername());
-        if (existOptional.isPresent()) {
-            ProfileEntity existsProfile = existOptional.get();
-            if (existsProfile.getStatus().equals(ProfileStatus.NOT_ACTIVE)) {
-                profileRoleService.deleteById(existsProfile.getId());
-                profileRepository.deleteById(existsProfile.getId()); // delete
-            } else {
-                throw new IllegalArgumentException("Username already exists");
-            }
-        }
-        MessageDTO messageDTO = new MessageDTO();
-        messageDTO.setToAccount(dto.getUsername());
-        messageDTO.setSubject("Ro'yhatdan o'tish");
-        List<EmailHistoryResponseDTO> existingMails = emailHistoryService.getByEmail(messageDTO.getToAccount());
-        if (existingMails.size() >= 4) {
-            EmailHistoryResponseDTO last = existingMails.getLast();
-            List<EmailHistoryResponseDTO> extracted = existingMails.subList(existingMails.indexOf(last) - 3, existingMails.indexOf(last));
-            if (extracted
-                    .getFirst()
-                    .getCreatedDate()
-                    .plusMinutes(1)
-                    .isAfter(
-                            LocalDateTime.now()
-                    )
-            ) {
-                throw new IllegalArgumentException("Verification code generation attempts exceeded the limit");
-            }
-        }
+        // check whether profile exists and it's status is ACTIVE
+        profileExistCheck(dto);
+        // check whether it made too many code generation email requests
+        messageAttemptsCheck(dto.getUsername());
         // create profile
         ProfileEntity profile = new ProfileEntity();
         profile.setName(dto.getName());
@@ -83,8 +60,14 @@ public class AuthService {
         profileRepository.save(profile);
         // create profile roles
         profileRoleService.create(profile.getId(), ProfileRole.ROLE_USER);
-        // send sms to amail or phone
+        //create message dto to send verification email code
+        MessageDTO messageDTO = new MessageDTO();
+        messageDTO.setToAccount(dto.getUsername());
+        messageDTO.setSubject("Ro'yhatdan o'tish");
+
         int verificationCode = randomClassConfig.random().nextInt(100000, 999999);
+
+        // send sms to amail or phone
         emailSendingService.sendEmailHtmlFormatted(messageDTO, verificationCode);
         //email history
         emailHistoryService.create(messageDTO, verificationCode);
@@ -94,31 +77,66 @@ public class AuthService {
         return "Tastiqlash kodi ketdi mazgi qara.";
     }
 
+    private void profileExistCheck(RegistrationDTO dto) {
+        Optional<ProfileEntity> existOptional = profileRepository.findByUsername(dto.getUsername());
+        if (existOptional.isPresent()) {
+            ProfileEntity existsProfile = existOptional.get();
+            if (existsProfile.getStatus().equals(ProfileStatus.NOT_ACTIVE)) {
+                profileRoleService.deleteById(existsProfile.getId());
+                profileRepository.deleteById(existsProfile.getId()); // delete
+            } else {
+                throw new ProfileExistsException("Username already exists");
+            }
+        }
+    }
+
+    private void messageAttemptsCheck(String username) {
+        List<EmailHistoryResponseDTO> existingMails = emailHistoryService.getByEmail(username);
+        if (existingMails.size() >= 4) {
+            EmailHistoryResponseDTO last = existingMails.getLast();
+            List<EmailHistoryResponseDTO> lastFour =
+                    existingMails.
+                            subList(existingMails.indexOf(last) - 3,
+                                    existingMails.indexOf(last));
+            EmailHistoryResponseDTO first = lastFour.getFirst();
+            if (first.getCreatedDate()
+                    .plusMinutes(1)
+                    .isAfter(LocalDateTime.now())
+            ) {
+                throw new AppBadException("Verification code generation attempts exceeded the limit");
+            }
+        }
+    }
+
     public void confirm(ConfirmationDTO dto) {
         List<EmailHistoryResponseDTO> list = emailHistoryService.getByEmail(dto.getEmail());
+        //get latest email sent to user
         EmailHistoryResponseDTO last = list.getLast();
-        if (last.getCreatedDate().plusMinutes(1).isBefore(LocalDateTime.now())) {
-            throw new IllegalArgumentException("Code expired");
+        //check if code matches with ours
+        if (!last.getMessage().equals(dto.getMessage())) {
+            throw new AppBadException("Wrong code");
         }
-        if (last.getMessage().equals(dto.getMessage()) && last.getEmail().equals(dto.getEmail())) {
-            profileRepository.updateStatusByUsername(dto.getEmail(), ProfileStatus.ACTIVE);
-            emailHistoryService.deleteByEmail(dto.getEmail());
-        }else{
-            throw new IllegalArgumentException("o'xshamadi");
+        if (last.getCreatedDate()
+                .plusMinutes(1)
+                .isBefore(LocalDateTime.now())) {
+            throw new AppBadException("Code expired");
         }
+
+        profileRepository.updateStatusByUsername(dto.getEmail(), ProfileStatus.ACTIVE);
+        emailHistoryService.deleteByEmail(dto.getEmail());
     }
 
     public ProfileResponseDTO login(AuthorizationDTO dto) {
         Optional<ProfileEntity> profileOptional = profileRepository.findByUsername(dto.getUsername());
         if (profileOptional.isEmpty()) {
-            throw new IllegalArgumentException("Username or password wrong");
+            throw new AppBadException("Username or password wrong");
         }
         ProfileEntity entity = profileOptional.get();
         if (!bCryptPasswordEncoder.matches(dto.getPassword(), entity.getPassword())) {
-            throw new IllegalArgumentException("Username or password wrong");
+            throw new AppBadException("Username or password wrong");
         }
         if (!entity.getStatus().equals(ProfileStatus.ACTIVE)) {
-            throw new IllegalArgumentException("User in wrong status");
+            throw new AppBadException("User in wrong status");
         }
         ProfileResponseDTO response = new ProfileResponseDTO();
         response.setId(entity.getId());

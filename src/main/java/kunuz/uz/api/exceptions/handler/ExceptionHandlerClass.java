@@ -44,6 +44,11 @@ public class ExceptionHandlerClass extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(value = RuntimeException.class)
+    public ResponseEntity<Object> handleAnyRuntimeException(RuntimeException ex){
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
     @Override
     protected @Nullable ResponseEntity<Object> handleTypeMismatch(TypeMismatchException ex,
                                                                   HttpHeaders headers,
