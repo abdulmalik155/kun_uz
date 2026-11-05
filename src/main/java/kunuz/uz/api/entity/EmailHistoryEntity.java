@@ -20,6 +20,9 @@ public class EmailHistoryEntity {
     @Column(name = "message")
     private String message;
 
+    @Column(name = "body", columnDefinition = "text")
+    private String body;
+
     @Column(name = "email")
     private String email;
 

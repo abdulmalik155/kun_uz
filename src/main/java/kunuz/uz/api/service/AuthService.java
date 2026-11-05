@@ -1,20 +1,18 @@
 package kunuz.uz.api.service;
 
 
-import jakarta.validation.Valid;
-import kunuz.uz.api.config.RandomClassConfig;
 import kunuz.uz.api.dto.AuthorizationDTO;
 import kunuz.uz.api.dto.ConfirmationDTO;
 import kunuz.uz.api.dto.request.MessageDTO;
 import kunuz.uz.api.dto.request.RegistrationDTO;
 import kunuz.uz.api.dto.response.EmailHistoryResponseDTO;
 import kunuz.uz.api.dto.response.ProfileResponseDTO;
-import kunuz.uz.api.entity.EmailHistoryEntity;
 import kunuz.uz.api.entity.ProfileEntity;
 import kunuz.uz.api.enums.ProfileRole;
 import kunuz.uz.api.enums.ProfileStatus;
 import kunuz.uz.api.exceptions.AppBadException;
 import kunuz.uz.api.exceptions.profile.ProfileExistsException;
+import kunuz.uz.api.exceptions.profile.ProfileNotFoundException;
 import kunuz.uz.api.repository.interfaces.ProfileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -39,9 +37,6 @@ public class AuthService {
     private EmailSendingService emailSendingService;
 
     @Autowired
-    private RandomClassConfig randomClassConfig;
-
-    @Autowired
     private EmailHistoryService emailHistoryService;
 
     public String registration(RegistrationDTO dto) {
@@ -57,87 +52,77 @@ public class AuthService {
         profile.setPassword(bCryptPasswordEncoder.encode(dto.getPassword()));
         profile.setVisible(true);
         profile.setStatus(ProfileStatus.NOT_ACTIVE);
+
         profileRepository.save(profile);
         // create profile roles
         profileRoleService.create(profile.getId(), ProfileRole.ROLE_USER);
-        //create message dto to send verification email code
-        MessageDTO messageDTO = new MessageDTO();
-        messageDTO.setToAccount(dto.getUsername());
-        messageDTO.setSubject("Ro'yhatdan o'tish");
-
-        int verificationCode = randomClassConfig.random().nextInt(100000, 999999);
-
         // send sms to amail or phone
-        emailSendingService.sendEmailHtmlFormatted(messageDTO, verificationCode);
         //email history
-        emailHistoryService.create(messageDTO, verificationCode);
+        emailSendingService.sendRegistrationStyledEmail(dto.getUsername());
 
         //confirm
-        // response
         return "Tastiqlash kodi ketdi mazgi qara.";
     }
 
     private void profileExistCheck(RegistrationDTO dto) {
         Optional<ProfileEntity> existOptional = profileRepository.findByUsername(dto.getUsername());
-        if (existOptional.isPresent()) {
-            ProfileEntity existsProfile = existOptional.get();
-            if (existsProfile.getStatus().equals(ProfileStatus.NOT_ACTIVE)) {
-                profileRoleService.deleteById(existsProfile.getId());
-                profileRepository.deleteById(existsProfile.getId()); // delete
-            } else {
-                throw new ProfileExistsException("Username already exists");
-            }
-        }
+        if (existOptional.isEmpty()) return;
+
+        ProfileEntity existsProfile = existOptional.get();
+
+        if (!existsProfile.getStatus().equals(ProfileStatus.NOT_ACTIVE))
+            throw new ProfileExistsException("Username already exists");
+
+        profileRoleService.deleteById(existsProfile.getId());
+        profileRepository.deleteById(existsProfile.getId()); // delete
     }
 
     private void messageAttemptsCheck(String username) {
         List<EmailHistoryResponseDTO> existingMails = emailHistoryService.getByEmail(username);
-        if (existingMails.size() >= 4) {
-            EmailHistoryResponseDTO last = existingMails.getLast();
-            List<EmailHistoryResponseDTO> lastFour =
-                    existingMails.
-                            subList(existingMails.indexOf(last) - 3,
-                                    existingMails.indexOf(last));
-            EmailHistoryResponseDTO first = lastFour.getFirst();
-            if (first.getCreatedDate()
-                    .plusMinutes(1)
-                    .isAfter(LocalDateTime.now())
-            ) {
-                throw new AppBadException("Verification code generation attempts exceeded the limit");
-            }
-        }
+        if (existingMails.size() < 4) return;
+
+        EmailHistoryResponseDTO last = existingMails.getLast();
+
+        List<EmailHistoryResponseDTO> lastFour = existingMails.subList
+                (existingMails.indexOf(last) - 3,
+                        existingMails.indexOf(last));
+
+        EmailHistoryResponseDTO first = lastFour.getFirst();
+
+        LocalDateTime limitDate = first.getCreatedDate().plusMinutes(1);
+
+        if (limitDate.isAfter(LocalDateTime.now())) throw new AppBadException("Attempts exceeded the limit");
     }
 
-    public void confirm(ConfirmationDTO dto) {
-        List<EmailHistoryResponseDTO> list = emailHistoryService.getByEmail(dto.getEmail());
-        //get latest email sent to user
-        EmailHistoryResponseDTO last = list.getLast();
-        //check if code matches with ours
-        if (!last.getMessage().equals(dto.getMessage())) {
-            throw new AppBadException("Wrong code");
-        }
-        if (last.getCreatedDate()
-                .plusMinutes(1)
-                .isBefore(LocalDateTime.now())) {
-            throw new AppBadException("Code expired");
-        }
 
-        profileRepository.updateStatusByUsername(dto.getEmail(), ProfileStatus.ACTIVE);
-        emailHistoryService.deleteByEmail(dto.getEmail());
+    public void confirm(ConfirmationDTO dto) {
+        Optional<ProfileEntity> existOptional = profileRepository.findByUsername(dto.getEmail());
+        if (existOptional.isEmpty()) throw new ProfileNotFoundException("User not found");
+
+        ProfileEntity profile = existOptional.get();
+
+        if (!profile.getStatus().equals(ProfileStatus.NOT_ACTIVE))
+            throw new AppBadException("User in wrong status");
+        // check for sms code and time
+        emailHistoryService.isSmsSendToAccount(dto.getEmail(), dto.getMessage());
+
+        profile.setStatus(ProfileStatus.ACTIVE);
+
+        profileRepository.save(profile);
     }
 
     public ProfileResponseDTO login(AuthorizationDTO dto) {
         Optional<ProfileEntity> profileOptional = profileRepository.findByUsername(dto.getUsername());
-        if (profileOptional.isEmpty()) {
-            throw new AppBadException("Username or password wrong");
-        }
+
+        if (profileOptional.isEmpty()) throw new AppBadException("Username or password wrong");
+
         ProfileEntity entity = profileOptional.get();
-        if (!bCryptPasswordEncoder.matches(dto.getPassword(), entity.getPassword())) {
+
+        if (!bCryptPasswordEncoder.matches(dto.getPassword(), entity.getPassword()))
             throw new AppBadException("Username or password wrong");
-        }
-        if (!entity.getStatus().equals(ProfileStatus.ACTIVE)) {
-            throw new AppBadException("User in wrong status");
-        }
+
+        if (!entity.getStatus().equals(ProfileStatus.ACTIVE)) throw new AppBadException("User in wrong status");
+
         ProfileResponseDTO response = new ProfileResponseDTO();
         response.setId(entity.getId());
         response.setName(entity.getName());

@@ -1,14 +1,2 @@
-select * from article;
 select * from profile;
-select * from profile_role;
-select * from article_section;
-select * from article_category;
-select * from category;
-select * from section;
-update article set visible = true where id = '42963aef-7e89-4243-ab35-e50b90434b2b';
-insert into profile_role (profile_id, role) values (172, 'ROLE_PUBLISHER');
-update article set region_id = 5 where id = 'c2285391-96bc-4204-aa03-897592e2cae9';
-select * from region;
-select * from article_tag;
-select * from tag;
-alter table article_tag drop column if exists name;
+update profile set status = 'NOT_ACTIVE' where id = 526;

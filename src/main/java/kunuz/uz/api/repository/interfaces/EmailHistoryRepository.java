@@ -6,12 +6,11 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface EmailHistoryRepository extends CrudRepository<EmailHistoryEntity, Long>, PagingAndSortingRepository<EmailHistoryEntity, Long> {
@@ -34,7 +33,8 @@ public interface EmailHistoryRepository extends CrudRepository<EmailHistoryEntit
             " WHERE e.email = ?1")
     void deleteByEmail(String toAccount);
 
-//    @Query(value = "SLE")
-//    List<EmailHistoryEntity> findAllByEmailAndTime(@Param(value = "email") String toAccount,
-//                                                   @Param(value = "time") LocalDateTime now);
+    Optional<EmailHistoryEntity> findTopByEmailOrderByCreatedDateDesc(String account);
+
+    @Query("from EmailHistoryEntity where email = ?1 order by createdDate desc limit 1")
+    Optional<EmailHistoryEntity> findLastByEmail(String email);
 }

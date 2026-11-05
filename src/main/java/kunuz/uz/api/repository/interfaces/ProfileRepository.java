@@ -30,11 +30,4 @@ public interface ProfileRepository extends CrudRepository<ProfileEntity, Long>, 
     @Query(value = "SELECT p FROM ProfileEntity AS p INNER JOIN FETCH p.roleList WHERE p.visible = TRUE")
     Page<ProfileEntity> findAllWithRole(Pageable pageable);
 
-    @Transactional
-    @Modifying
-    @Query(value = "UPDATE ProfileEntity AS p " +
-            " SET p.status = :status " +
-            " WHERE p.username = :email ")
-    void updateStatusByUsername(@Param(value = "email") String email,
-                                @Param(value = "status") ProfileStatus status);
 }
