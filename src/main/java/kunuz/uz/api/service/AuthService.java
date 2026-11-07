@@ -39,6 +39,9 @@ public class AuthService {
     @Autowired
     private EmailHistoryService emailHistoryService;
 
+    @Autowired
+    private SmsSenderService smsSenderService;
+
     public String registration(RegistrationDTO dto) {
         // check whether profile exists and it's status is ACTIVE
         profileExistCheck(dto);
@@ -58,7 +61,9 @@ public class AuthService {
         profileRoleService.create(profile.getId(), ProfileRole.ROLE_USER);
         // send sms to amail or phone
         //email history
-        emailSendingService.sendRegistrationStyledEmail(dto.getUsername());
+//        emailSendingService.sendRegistrationStyledEmail(dto.getUsername());
+        //Eskiz Test
+        smsSenderService.sendRegistrationSms(dto.getUsername().trim(), "This is test from Eskiz");
 
         //confirm
         return "Tastiqlash kodi ketdi mazgi qara.";

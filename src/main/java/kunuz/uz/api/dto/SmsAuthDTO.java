@@ -1,11 +1,11 @@
 package kunuz.uz.api.dto;
 
 import lombok.Getter;
-import org.springframework.stereotype.Service;
+import lombok.Setter;
 
 @Getter
-@Service
+@Setter
 public class SmsAuthDTO {
-    private String email;
+    private String username;
     private String password;
 }
