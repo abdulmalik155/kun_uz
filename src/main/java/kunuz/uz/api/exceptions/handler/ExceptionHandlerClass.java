@@ -1,5 +1,6 @@
 package kunuz.uz.api.exceptions.handler;
 
+import kunuz.uz.api.exceptions.UnauthorizedProfileException;
 import org.jspecify.annotations.Nullable;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -47,6 +48,11 @@ public class ExceptionHandlerClass extends ResponseEntityExceptionHandler {
     @ExceptionHandler(value = RuntimeException.class)
     public ResponseEntity<Object> handleAnyRuntimeException(RuntimeException ex){
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(value = UnauthorizedProfileException.class)
+    public ResponseEntity<Object> handleAnyUnauthorizedProfileException(UnauthorizedProfileException ex){
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.UNAUTHORIZED);
     }
 
     @Override

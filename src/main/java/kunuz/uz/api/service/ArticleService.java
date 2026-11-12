@@ -10,6 +10,7 @@ import kunuz.uz.api.enums.ProfileRole;
 import kunuz.uz.api.exceptions.ArticleExistsException;
 import kunuz.uz.api.exceptions.ArticleNotFoundException;
 import kunuz.uz.api.dto.response.ArticleFullInfo;
+import kunuz.uz.api.exceptions.UnauthorizedProfileException;
 import kunuz.uz.api.mapper.article.ArticleShortInfo;
 import kunuz.uz.api.repository.interfaces.ArticleRepository;
 import kunuz.uz.api.util.ArticleUtil;
@@ -20,6 +21,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.LinkedList;
@@ -48,17 +50,15 @@ public class ArticleService {
     @Autowired
     private ArticleTagService tagService;
 
+    @Transactional(rollbackFor = {RuntimeException.class})
     public ArticleResponseDTO create(Long moderatorId, ArticleRequestDTO dto) {
         Optional<ArticleEntity> existsOptional = repository.findDuplicate(moderatorId,
                 dto.getRegionId(),
                 dto.getTitle().trim(),
                 dto.getDescription().trim(),
                 dto.getContent().trim());
-        if (existsOptional.isPresent()){
+        if (existsOptional.isPresent()) {
             throw new ArticleExistsException("Article exists");
-        }
-        if(!roleService.getAllByProfileId(moderatorId).contains(ProfileRole.ROLE_MODERATOR)){
-            throw new IllegalArgumentException("This is not a journalist(moderator)");
         }
         ArticleEntity newArticle = util.toEntity(dto, new ArticleEntity());
         newArticle.setModeratorId(moderatorId);
@@ -70,16 +70,20 @@ public class ArticleService {
         return response;
     }
 
-
-    public ArticleResponseDTO update(UUID articleId, ArticleRequestDTO dto) {
+    @Transactional(rollbackFor = {RuntimeException.class})
+    public ArticleResponseDTO update(Long moderatorId, UUID articleId, ArticleRequestDTO dto) {
         ArticleEntity existing = getOrThrow(articleId);
+        if (!existing.getModeratorId().equals(moderatorId)) {
+            throw new UnauthorizedProfileException("Unauthorized moderator");
+        }
         ArticleEntity updated = repository.save(util.toEntity(dto, existing));
         categoryService.merge(articleId, dto.getCategoryList());
         sectionService.merge(articleId, dto.getSectionList());
-        tagService.merge(articleId,dto.getTagList());
+        tagService.merge(articleId, dto.getTagList());
         ArticleResponseDTO response = util.toDto(updated);
         return response;
     }
+
 
     public ArticleEntity getOrThrow(UUID id) {
         return repository.findByIdVisibleTrue(id)
@@ -88,29 +92,30 @@ public class ArticleService {
                 );
     }
 
-    public String delete(UUID id) {
-        repository.updateVisibleById(id);
+    @Transactional(rollbackFor = {RuntimeException.class})
+    public String delete(Long moderatorId, UUID articleId) {
+        Long articleModeratorId = getOrThrow(articleId).getModeratorId();
+        if (!articleModeratorId.equals(moderatorId)) throw new UnauthorizedProfileException("Unauthorized moderator");
+        repository.updateVisibleById(articleId);
         return "Successfully deleted";
     }
 
     public String changeStatusById(UUID articleId, Long publisherId, ArticleStatus status) {
         ArticleEntity existing = getOrThrow(articleId);
-        if(!roleService.getAllByProfileId(publisherId).contains(ProfileRole.ROLE_PUBLISHER)){
-            throw new IllegalArgumentException("This is not publisher");
-        }
-        if(existing.getPublisherId() != null && !existing.getPublisherId().equals(publisherId)){
+
+        if (existing.getPublisherId() != null && !existing.getPublisherId().equals(publisherId)) {
             throw new IllegalArgumentException("Only the one who published it can change it's status");
         }
-        if(existing.getModeratorId().equals(publisherId)){
+        if (existing.getModeratorId().equals(publisherId)) {
             throw new IllegalArgumentException("Even if moderator also has publisher role he/she can't publish it at the same time");
         }
-        if(existing.getPublishedDate() == null && status.equals(ArticleStatus.NOT_PUBLISHED)){
+        if (existing.getPublishedDate() == null && status.equals(ArticleStatus.NOT_PUBLISHED)) {
             throw new IllegalArgumentException("It's already in not published status(it was not published at all)");
         }
-        if(status.equals(ArticleStatus.PUBLISHED) && existing.getPublishedDate() != null && existing.getStatus().equals(ArticleStatus.PUBLISHED)){
+        if (status.equals(ArticleStatus.PUBLISHED) && existing.getPublishedDate() != null && existing.getStatus().equals(ArticleStatus.PUBLISHED)) {
             throw new IllegalArgumentException("Kallavaram! it's already published");
         }
-        if(status.equals(ArticleStatus.PUBLISHED)){
+        if (status.equals(ArticleStatus.PUBLISHED)) {
             existing.setPublishedDate(LocalDateTime.now());
         }
         existing.setStatus(status);
@@ -120,33 +125,33 @@ public class ArticleService {
     }
 
     public Page<ArticleShortInfo> getBySectionId(int page, int size, Integer sectionId) {
-        PaginationUtil.check(page,size);
+        PaginationUtil.check(page, size);
         page--;
-        PageRequest request = PageRequest.of(page,size, Sort.by("createdDate").descending());
+        PageRequest request = PageRequest.of(page, size, Sort.by("createdDate").descending());
         Page<ArticleShortInfo> entities = repository.findLastNBySectionId(sectionId, request);
         return entities;
     }
 
     public Page<ArticleShortInfo> getLast12Except(ArticleListDTO dto, int page, int size) {
-        PaginationUtil.check(page,size);
+        PaginationUtil.check(page, size);
         page--;
-        PageRequest request = PageRequest.of(page,size, Sort.by("createdDate").descending());
+        PageRequest request = PageRequest.of(page, size, Sort.by("createdDate").descending());
         Page<ArticleShortInfo> entities = repository.findLast12Except(dto.getArticleIds(), request);
         return entities;
     }
 
     public Page<ArticleShortInfo> getByCategoryId(int page, int size, Integer categoryId) {
-        PaginationUtil.check(page,size);
+        PaginationUtil.check(page, size);
         page--;
-        PageRequest request = PageRequest.of(page,size, Sort.by("createdDate").descending());
+        PageRequest request = PageRequest.of(page, size, Sort.by("createdDate").descending());
         Page<ArticleShortInfo> entities = repository.findLastNByCategoryId(categoryId, request);
         return entities;
     }
 
     public Page<ArticleFullInfo> getByRegionId(int page, int size, Integer regionId) {
-        PaginationUtil.check(page,size);
+        PaginationUtil.check(page, size);
         page--;
-        PageRequest request = PageRequest.of(page,size, Sort.by("createdDate").descending());
+        PageRequest request = PageRequest.of(page, size, Sort.by("createdDate").descending());
         Page<ArticleEntity> entities = repository.findLastNByRegionId(regionId, request);
         List<ArticleFullInfo> list = new LinkedList<>();
         for (ArticleEntity entity : entities.getContent()) {
@@ -172,15 +177,15 @@ public class ArticleService {
         return info;
     }
 
-    public ArticleFullInfo getByIdAndLang( UUID articleId, Language language) {
+    public ArticleFullInfo getByIdAndLang(UUID articleId, Language language) {
         ArticleEntity existing = getOrThrow(articleId);
         return toFullInfo(existing, language.toString());
     }
 
     public Page<ArticleFullInfo> getByTagName(int page, int size, String name) {
-        PaginationUtil.check(page,size);
+        PaginationUtil.check(page, size);
         page--;
-        PageRequest request = PageRequest.of(page,size, Sort.by("createdDate").descending());
+        PageRequest request = PageRequest.of(page, size, Sort.by("createdDate").descending());
         Page<ArticleEntity> entities = repository.findLastNByTagName(name.trim(), request);
         List<ArticleFullInfo> list = new LinkedList<>();
         for (ArticleEntity entity : entities.getContent()) {

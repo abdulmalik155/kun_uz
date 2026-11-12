@@ -21,6 +21,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -44,7 +45,8 @@ public class ProfileService {
     @Autowired
     private ProfileRoleService roleService;
 
-    public ProfileResponseDTO create(ProfileRequestDTO dto) {
+    @Transactional(rollbackFor = {RuntimeException.class})
+    public ProfileResponseDTO create(Long adminId, ProfileRequestDTO dto) {
         createCheck(dto);
         ProfileEntity entity = new ProfileEntity();
         entity.setName(dto.getName());
@@ -53,6 +55,7 @@ public class ProfileService {
         entity.setVisible(true);
         entity.setStatus(ProfileStatus.ACTIVE);
         entity.setPassword(encoder.encode(dto.getPassword()));
+        entity.setAdminId(adminId);
         repository.save(entity);
         roleService.create(entity.getId(), dto.getRoleList());
         ProfileResponseDTO responseDTO = util.toDto(entity);
@@ -61,7 +64,7 @@ public class ProfileService {
     }
 
     private void createCheck(ProfileRequestDTO dto) {
-        Optional<ProfileEntity> optionalExisting = repository.findByUsername(dto.getUsername().trim());
+        Optional<ProfileEntity> optionalExisting = repository.findByUsernameAndVisibleTrue(dto.getUsername().trim());
         if(optionalExisting.isPresent()){
             throw new ProfileExistsException("Profile already exists");
         }
@@ -73,17 +76,18 @@ public class ProfileService {
         }
     }
 
-    public ProfileResponseDTO updateForAdmin(Long id, ProfileUpdateDTO newDto) {
-        Optional<ProfileEntity> optionalExisting = repository.findByUsername(newDto.getUsername().trim());
+    @Transactional(rollbackFor = {RuntimeException.class})
+    public ProfileResponseDTO updateForAdmin(Long profileId, ProfileUpdateDTO newDto) {
+        Optional<ProfileEntity> optionalExisting = repository.findByUsernameAndVisibleTrue(newDto.getUsername().trim());
         if(optionalExisting.isEmpty()){
             throw new ProfileNotFoundException("Profile doesn't exists");
         }
-        ProfileEntity entity = getOrThrow(id);
+        ProfileEntity entity = getOrThrow(profileId);
         entity.setName(newDto.getName());
         entity.setSurname(newDto.getSurname());
         entity.setUsername(newDto.getUsername());
         repository.save(entity);
-        roleService.merge(id, newDto.getRoleList());
+        roleService.merge(profileId, newDto.getRoleList());
         ProfileResponseDTO responseDTO = util.toDto(entity);
         responseDTO.setRoleList(newDto.getRoleList());
         return responseDTO;
@@ -98,7 +102,7 @@ public class ProfileService {
     }
 
     private ProfileEntity getOrThrow(Long id) {
-        return repository.findById(id)
+        return repository.findByIdAndVisibleTrue(id)
                 .orElseThrow(() -> new ProfileNotFoundException(String.format("There is no profile with such id %s", id)));
     }
 

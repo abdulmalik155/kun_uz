@@ -3,14 +3,12 @@ package kunuz.uz.api.repository.interfaces;
 
 import jakarta.transaction.Transactional;
 import kunuz.uz.api.entity.ProfileEntity;
-import kunuz.uz.api.enums.ProfileStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -20,7 +18,7 @@ public interface ProfileRepository extends CrudRepository<ProfileEntity, Long>, 
 
 
     @Query(value = "SELECT p FROM ProfileEntity AS p WHERE p.username = ?1 AND p.visible = TRUE")
-    Optional<ProfileEntity> findByUsername(String username);
+    Optional<ProfileEntity> findByUsernameAndVisibleTrue(String username);
 
     @Transactional
     @Modifying
@@ -30,4 +28,5 @@ public interface ProfileRepository extends CrudRepository<ProfileEntity, Long>, 
     @Query(value = "SELECT p FROM ProfileEntity AS p INNER JOIN FETCH p.roleList WHERE p.visible = TRUE")
     Page<ProfileEntity> findAllWithRole(Pageable pageable);
 
+    Optional<ProfileEntity> findByIdAndVisibleTrue(Long id);
 }

@@ -17,4 +17,5 @@ public class ProfileResponseDTO {
     private String username;
     private List<ProfileRole> roleList;
     private LocalDateTime createdDate;
+    private String token;
 }

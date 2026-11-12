@@ -3,7 +3,6 @@ package kunuz.uz.api.service;
 
 import kunuz.uz.api.dto.AuthorizationDTO;
 import kunuz.uz.api.dto.ConfirmationDTO;
-import kunuz.uz.api.dto.request.MessageDTO;
 import kunuz.uz.api.dto.request.RegistrationDTO;
 import kunuz.uz.api.dto.response.EmailHistoryResponseDTO;
 import kunuz.uz.api.dto.response.ProfileResponseDTO;
@@ -42,6 +41,9 @@ public class AuthService {
     @Autowired
     private SmsSenderService smsSenderService;
 
+    @Autowired
+    private JwtService jwtService;
+
     public String registration(RegistrationDTO dto) {
         // check whether profile exists and it's status is ACTIVE
         profileExistCheck(dto);
@@ -61,16 +63,16 @@ public class AuthService {
         profileRoleService.create(profile.getId(), ProfileRole.ROLE_USER);
         // send sms to amail or phone
         //email history
-//        emailSendingService.sendRegistrationStyledEmail(dto.getUsername());
+        emailSendingService.sendRegistrationStyledEmail(dto.getUsername());
         //Eskiz Test
-        smsSenderService.sendRegistrationSms(dto.getUsername().trim(), "This is test from Eskiz");
+//        smsSenderService.sendRegistrationSms(dto.getUsername().trim(), "This is test from Eskiz");
 
         //confirm
         return "Tastiqlash kodi ketdi mazgi qara.";
     }
 
     private void profileExistCheck(RegistrationDTO dto) {
-        Optional<ProfileEntity> existOptional = profileRepository.findByUsername(dto.getUsername());
+        Optional<ProfileEntity> existOptional = profileRepository.findByUsernameAndVisibleTrue(dto.getUsername());
         if (existOptional.isEmpty()) return;
 
         ProfileEntity existsProfile = existOptional.get();
@@ -101,7 +103,7 @@ public class AuthService {
 
 
     public void confirm(ConfirmationDTO dto) {
-        Optional<ProfileEntity> existOptional = profileRepository.findByUsername(dto.getEmail());
+        Optional<ProfileEntity> existOptional = profileRepository.findByUsernameAndVisibleTrue(dto.getEmail());
         if (existOptional.isEmpty()) throw new ProfileNotFoundException("User not found");
 
         ProfileEntity profile = existOptional.get();
@@ -109,7 +111,7 @@ public class AuthService {
         if (!profile.getStatus().equals(ProfileStatus.NOT_ACTIVE))
             throw new AppBadException("User in wrong status");
         // check for sms code and time
-        emailHistoryService.isSmsSendToAccount(dto.getEmail(), dto.getMessage());
+        emailHistoryService.isSmsSentToAccount(dto.getEmail(), dto.getMessage());
 
         profile.setStatus(ProfileStatus.ACTIVE);
 
@@ -117,7 +119,7 @@ public class AuthService {
     }
 
     public ProfileResponseDTO login(AuthorizationDTO dto) {
-        Optional<ProfileEntity> profileOptional = profileRepository.findByUsername(dto.getUsername());
+        Optional<ProfileEntity> profileOptional = profileRepository.findByUsernameAndVisibleTrue(dto.getUsername());
 
         if (profileOptional.isEmpty()) throw new AppBadException("Username or password wrong");
 
@@ -134,6 +136,7 @@ public class AuthService {
         response.setSurname(entity.getSurname());
         response.setUsername(entity.getUsername());
         response.setRoleList(profileRoleService.getAllByProfileId(entity.getId()));
+        response.setToken(jwtService.encode(String.valueOf(response.getId()), response.getUsername(), response.getRoleList()));
         return response;
     }
 

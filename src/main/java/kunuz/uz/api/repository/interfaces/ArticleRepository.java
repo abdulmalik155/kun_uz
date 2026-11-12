@@ -98,6 +98,9 @@ public interface ArticleRepository extends CrudRepository<ArticleEntity, UUID>, 
             " AND tag.name = ?1")
     Page<ArticleEntity> findLastNByTagName(String name, Pageable request);
 
+    ArticleEntity findByIdAndModeratorId(UUID articleId, Long moderatorId);
+
+
 //    @Query(value = "SELECT a " +
 //            " FROM ArticleEntity AS a " +
 //            " INNER JOIN a.categoryList AS category " +

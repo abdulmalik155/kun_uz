@@ -2,6 +2,7 @@ package kunuz.uz.api.util;
 
 import kunuz.uz.api.dto.response.ProfileResponseDTO;
 import kunuz.uz.api.entity.ProfileEntity;
+import kunuz.uz.api.enums.ProfileRole;
 import org.springframework.stereotype.Component;
 
 import java.util.LinkedList;
@@ -9,6 +10,7 @@ import java.util.List;
 
 @Component
 public class ProfileUtil {
+
 
     public ProfileResponseDTO toDto(ProfileEntity entity) {
         ProfileResponseDTO dto = new ProfileResponseDTO();
@@ -27,5 +29,6 @@ public class ProfileUtil {
         }
         return list;
     }
+
 
 }

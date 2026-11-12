@@ -37,7 +37,7 @@ public class EmailHistoryService {
         return toDtoList(list);
     }
 
-    public void isSmsSendToAccount(String email, String message) {
+    public void isSmsSentToAccount(String email, String message) {
         Optional<EmailHistoryEntity> optional = repository.findLastByEmail(email);
         if (optional.isEmpty()) {
              throw new AppBadException("Not completed");

@@ -5,6 +5,7 @@ import kunuz.uz.api.dto.request.profile.*;
 import kunuz.uz.api.dto.response.ProfileResponseDTO;
 import kunuz.uz.api.mapper.profile.ProfileInfoDTO;
 import kunuz.uz.api.service.ProfileService;
+import kunuz.uz.api.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -18,23 +19,31 @@ public class ProfileController {
     @Autowired
     private ProfileService service;
 
+    @Autowired
+    private JwtUtil jwtUtil;
+
     //ADMIN
     @PostMapping(value = "")
-    public ResponseEntity<ProfileResponseDTO> create(@Valid @RequestBody ProfileRequestDTO dto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(dto));
+    public ResponseEntity<ProfileResponseDTO> create(@RequestHeader(value = "Authorization") String token,
+                                                     @Valid @RequestBody ProfileRequestDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(jwtUtil.adminId(token), dto));
     }
 
     //ADMIN
     @GetMapping(value = "/by-id")
-    public ResponseEntity<ProfileResponseDTO> getById(@RequestHeader(value = "id") Long id) {
+    public ResponseEntity<ProfileResponseDTO> getById(@RequestHeader(value = "Authorization") String token,
+                                                      @RequestHeader(value = "id") Long id) {
+        jwtUtil.adminId(token);
         return ResponseEntity.ok(service.getById(id));
     }
 
     //ADMIN
     @PutMapping(value = "")
-    public ResponseEntity<ProfileResponseDTO> update(@RequestHeader(value = "id") Long id,
+    public ResponseEntity<ProfileResponseDTO> update(@RequestHeader(value = "Authorization") String token,
+                                                     @RequestHeader(value = "profileId") Long profileId,
                                                      @Valid @RequestBody ProfileUpdateDTO dto) {
-        return ResponseEntity.ok(service.updateForAdmin(id, dto));
+        jwtUtil.adminId(token);
+        return ResponseEntity.ok(service.updateForAdmin(profileId, dto));
     }
 
     //ANY

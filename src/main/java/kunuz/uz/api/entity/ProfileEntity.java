@@ -52,4 +52,11 @@ public class ProfileEntity {
 
     @Column(name = "photo_id")
     private Long photoId;
+
+    @Column(name = "admin_id")
+    private Long adminId;
+
+    @OneToOne
+    @JoinColumn(name = "admin_id", insertable = false, updatable = false, nullable = true)
+    private ProfileEntity admin;
 }
