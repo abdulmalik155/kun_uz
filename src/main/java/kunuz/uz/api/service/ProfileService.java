@@ -6,6 +6,7 @@ import kunuz.uz.api.entity.ProfileEntity;
 import kunuz.uz.api.entity.ProfileRoleEntity;
 import kunuz.uz.api.enums.ProfileRole;
 import kunuz.uz.api.enums.ProfileStatus;
+import kunuz.uz.api.exceptions.UnauthorizedProfileException;
 import kunuz.uz.api.exceptions.profile.PasswordMismatchException;
 import kunuz.uz.api.exceptions.profile.ProfileExistsException;
 import kunuz.uz.api.exceptions.profile.ProfileNotFoundException;
@@ -14,6 +15,7 @@ import kunuz.uz.api.repository.custom.classes.ProfileCustomRepository;
 import kunuz.uz.api.repository.interfaces.ProfileRepository;
 import kunuz.uz.api.util.PaginationUtil;
 import kunuz.uz.api.util.ProfileUtil;
+import kunuz.uz.api.util.SecurityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -46,7 +48,7 @@ public class ProfileService {
     private ProfileRoleService roleService;
 
     @Transactional(rollbackFor = {RuntimeException.class})
-    public ProfileResponseDTO create(Long adminId, ProfileRequestDTO dto) {
+    public ProfileResponseDTO create(ProfileRequestDTO dto) {
         createCheck(dto);
         ProfileEntity entity = new ProfileEntity();
         entity.setName(dto.getName());
@@ -55,7 +57,7 @@ public class ProfileService {
         entity.setVisible(true);
         entity.setStatus(ProfileStatus.ACTIVE);
         entity.setPassword(encoder.encode(dto.getPassword()));
-        entity.setAdminId(adminId);
+        entity.setAdminId(SecurityUtil.currentUserId());
         repository.save(entity);
         roleService.create(entity.getId(), dto.getRoleList());
         ProfileResponseDTO responseDTO = util.toDto(entity);
@@ -65,13 +67,13 @@ public class ProfileService {
 
     private void createCheck(ProfileRequestDTO dto) {
         Optional<ProfileEntity> optionalExisting = repository.findByUsernameAndVisibleTrue(dto.getUsername().trim());
-        if(optionalExisting.isPresent()){
+        if (optionalExisting.isPresent()) {
             throw new ProfileExistsException("Profile already exists");
         }
         dto.getRoleList()
                 .removeIf(profileRole ->
                         profileRole.equals(ProfileRole.ROLE_USER) || profileRole.equals(ProfileRole.ROLE_ADMIN));
-        if(dto.getRoleList().isEmpty()){
+        if (dto.getRoleList().isEmpty()) {
             throw new IllegalArgumentException("Admin can not create another admin or user");
         }
     }
@@ -79,10 +81,12 @@ public class ProfileService {
     @Transactional(rollbackFor = {RuntimeException.class})
     public ProfileResponseDTO updateForAdmin(Long profileId, ProfileUpdateDTO newDto) {
         Optional<ProfileEntity> optionalExisting = repository.findByUsernameAndVisibleTrue(newDto.getUsername().trim());
-        if(optionalExisting.isEmpty()){
+        if (optionalExisting.isEmpty()) {
             throw new ProfileNotFoundException("Profile doesn't exists");
         }
-        ProfileEntity entity = getOrThrow(profileId);
+        ProfileEntity entity = optionalExisting.get();
+        if (!entity.getAdminId().equals(SecurityUtil.currentUserId()))
+            throw new UnauthorizedProfileException("Every admin can only access profile he's attached to");
         entity.setName(newDto.getName());
         entity.setSurname(newDto.getSurname());
         entity.setUsername(newDto.getUsername());
@@ -93,8 +97,8 @@ public class ProfileService {
         return responseDTO;
     }
 
-    public ProfileResponseDTO updateDetail(Long id, ProfileUpdateDetailDTO dto) {
-        ProfileEntity entityToUpdate = getOrThrow(id);
+    public ProfileResponseDTO updateDetail( ProfileUpdateDetailDTO dto) {
+        ProfileEntity entityToUpdate = getOrThrow(SecurityUtil.currentUserId());
         entityToUpdate.setName(dto.getName());
         entityToUpdate.setSurname(dto.getSurname());
         repository.save(entityToUpdate);
@@ -110,22 +114,25 @@ public class ProfileService {
         PaginationUtil.check(page, size);
         page--;
         PageRequest request = PageRequest.of(page, size, Sort.by("createdDate").descending());
-        Page<ProfileEntity> entities = repository.findAllWithRole(request);
+        Page<ProfileEntity> entities = repository.findAllWithRole(SecurityUtil.currentUserId(), request);
         return new PageImpl<>(util.toDtoList(entities.getContent()), entities.getPageable(), entities.getTotalElements());
     }
 
-    public void deleteById(Long id) {
-        repository.updateVisibleById(id);
+    public void deleteById(Long profileId) {
+        ProfileEntity existing = getOrThrow(profileId);
+        if (!existing.getAdminId().equals(SecurityUtil.currentUserId()))
+            throw new UnauthorizedProfileException("Unauthorized to change this profile");
+        repository.updateVisibleById(profileId);
     }
 
     public Page<ProfileInfoDTO> filter(int page, int size, ProfileFilterDTO dto) {
         PaginationUtil.check(page, size);
         page--;
-        Page<ProfileEntity> entities = customRepository.filter(page, size, dto);
+        Page<ProfileEntity> entities = customRepository.filter(SecurityUtil.currentUserId(), page, size, dto);
         return new PageImpl<>(toInfoList(entities.getContent()), entities.getPageable(), entities.getTotalElements());
     }
 
-    private List<ProfileInfoDTO> toInfoList(Iterable<ProfileEntity> iterable){
+    private List<ProfileInfoDTO> toInfoList(Iterable<ProfileEntity> iterable) {
         List<ProfileInfoDTO> list = new LinkedList<>();
         for (ProfileEntity entity : iterable) {
             ProfileInfoDTO dto = new ProfileInfoDTO();
@@ -150,9 +157,9 @@ public class ProfileService {
         return dto;
     }
 
-    public Boolean updatePassword(Long id, ProfilePasswordUpdateDTO dto) {
-        ProfileEntity entity = getOrThrow(id);
-        if(!encoder.matches(dto.getCurrentPassword(), entity.getPassword())){
+    public Boolean updatePassword(ProfilePasswordUpdateDTO dto) {
+        ProfileEntity entity = getOrThrow(SecurityUtil.currentUserId());
+        if (!encoder.matches(dto.getCurrentPassword(), entity.getPassword())) {
             throw new PasswordMismatchException("Wrong password");
         }
         entity.setPassword(encoder.encode(dto.getNewPassword().trim()));

@@ -5,7 +5,6 @@ import kunuz.uz.api.dto.request.profile.*;
 import kunuz.uz.api.dto.response.ProfileResponseDTO;
 import kunuz.uz.api.mapper.profile.ProfileInfoDTO;
 import kunuz.uz.api.service.ProfileService;
-import kunuz.uz.api.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -19,59 +18,50 @@ public class ProfileController {
     @Autowired
     private ProfileService service;
 
-    @Autowired
-    private JwtUtil jwtUtil;
-
     //ADMIN
     @PostMapping(value = "")
-    public ResponseEntity<ProfileResponseDTO> create(@RequestHeader(value = "Authorization") String token,
-                                                     @Valid @RequestBody ProfileRequestDTO dto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(jwtUtil.adminId(token), dto));
+    public ResponseEntity<ProfileResponseDTO> create(@Valid @RequestBody ProfileRequestDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(dto));
     }
 
     //ADMIN
     @GetMapping(value = "/by-id")
-    public ResponseEntity<ProfileResponseDTO> getById(@RequestHeader(value = "Authorization") String token,
-                                                      @RequestHeader(value = "id") Long id) {
-        jwtUtil.adminId(token);
+    public ResponseEntity<ProfileResponseDTO> getById(@RequestHeader(value = "id") Long id) {
         return ResponseEntity.ok(service.getById(id));
     }
 
     //ADMIN
     @PutMapping(value = "")
-    public ResponseEntity<ProfileResponseDTO> update(@RequestHeader(value = "Authorization") String token,
-                                                     @RequestHeader(value = "profileId") Long profileId,
+    public ResponseEntity<ProfileResponseDTO> update(@RequestHeader(value = "profileId") Long profileId,
                                                      @Valid @RequestBody ProfileUpdateDTO dto) {
-        jwtUtil.adminId(token);
         return ResponseEntity.ok(service.updateForAdmin(profileId, dto));
     }
 
     //ANY
     @PutMapping(value = "/update-any")
-    public ResponseEntity<ProfileResponseDTO> updateDetail(@RequestHeader(value = "id") Long id,
-                                                           @Valid @RequestBody ProfileUpdateDetailDTO dto) {
-        return ResponseEntity.ok(service.updateDetail(id, dto));
+    public ResponseEntity<ProfileResponseDTO> updateDetail(@Valid @RequestBody ProfileUpdateDetailDTO dto) {
+        return ResponseEntity.ok(service.updateDetail(dto));
     }
 
     //ADMIN
     @GetMapping(value = "/paging")
     public ResponseEntity<Page<ProfileResponseDTO>> paging(@RequestParam(value = "page", defaultValue = "1") int page,
                                                            @RequestParam(value = "size", defaultValue = "10") int size) {
+        ;
         return ResponseEntity.ok(service.paging(page, size));
     }
 
     //ADMIN
     @DeleteMapping(value = "")
-    public ResponseEntity<?> deleteById(@RequestHeader(value = "id") Long id) {
-        service.deleteById(id);
+    public ResponseEntity<?> deleteById(@RequestHeader(value = "profileId") Long profileId) {
+        service.deleteById(profileId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     //ANY
     @PutMapping(value = "/password")
-    public ResponseEntity<Boolean> updatePassword(@RequestHeader(value = "id") Long id,
-                                                  @RequestBody ProfilePasswordUpdateDTO dto) {
-        return ResponseEntity.ok(service.updatePassword(id, dto));
+    public ResponseEntity<Boolean> updatePassword(@RequestBody ProfilePasswordUpdateDTO dto) {
+        return ResponseEntity.ok(service.updatePassword(dto));
     }
 
     //ADMIN

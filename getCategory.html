@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CORS</title>
+</head>
+<body>
+
+<h1>CORS request example</h1>
+<p>Bu namuna <code>http://localhost:8080/api/v1/category/list</code> api-ga oddiy get request jo'natadi va natijani ko'rsatadi.</p>
+<button onclick="makeRequest()"> Make GET request</button>
+<br>
+<br>
+<div id="result">Request Result</div>
+</body>
+
+</html>
+<script>
+    function makeRequest() {
+        const resultDiv = document.getElementById("result");
+        resultDiv.innerHTML = "Loading...";
+
+        fetch("http://localhost:8080/api/v1/category/list")
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Network response was not ok");
+                }
+                return response.json(); // Parse JSON into a JS array/object
+            })
+            .then(data => {
+                // Clear previous content
+                resultDiv.innerHTML = "";
+
+                // Create a list or table
+                const ul = document.createElement("ul");
+
+                // Assuming 'data' is an array of CategoryDTO objects (e.g., [{id: 1, name: "Tech"}, ...])
+                data.forEach(item => {
+                    const li = document.createElement("li");
+                    // Change 'item.id' and 'item.name' to match your actual DTO field names
+                    li.textContent = `ID: ${item.id} - Name: ${item.nameUz}`;
+                    ul.appendChild(li);
+                });
+
+                resultDiv.appendChild(ul);
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                resultDiv.innerText = "Error fetching data. Check console (F12) for CORS or server errors.";
+            });
+    }
+</script>

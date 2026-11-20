@@ -26,9 +26,9 @@ public class RegionController {
     }
 
     @PutMapping(value = "")
-    public ResponseEntity<RegionResponseDTO> update(@RequestParam(value = "id") Integer id,
-                                                        @Valid @RequestBody RegionRequestDTO dto){
-        return ResponseEntity.ok(service.update(id,dto));
+    public ResponseEntity<RegionResponseDTO> update(@RequestParam(value = "id") Integer regionId,
+                                                    @Valid @RequestBody RegionRequestDTO dto){
+        return ResponseEntity.ok(service.update(regionId,dto));
     }
 
     @DeleteMapping(value = "")

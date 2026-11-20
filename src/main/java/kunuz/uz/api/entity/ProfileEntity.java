@@ -6,9 +6,9 @@ import kunuz.uz.api.enums.ProfileStatus;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
-import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
+import java.util.LinkedList;
 import java.util.List;
 
 @Entity
@@ -56,7 +56,15 @@ public class ProfileEntity {
     @Column(name = "admin_id")
     private Long adminId;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "admin_id", insertable = false, updatable = false, nullable = true)
     private ProfileEntity admin;
+
+    public List<ProfileRole> roleEnums(List<ProfileRoleEntity> roleEntityList){
+        List<ProfileRole> list = new LinkedList<>();
+        for (ProfileRoleEntity profileRoleEntity : roleEntityList) {
+            list.add(profileRoleEntity.getRole());
+        }
+        return list;
+    }
 }

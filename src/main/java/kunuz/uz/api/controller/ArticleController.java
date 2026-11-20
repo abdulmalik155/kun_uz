@@ -8,7 +8,6 @@ import kunuz.uz.api.enums.ArticleStatus;
 import kunuz.uz.api.enums.Language;
 import kunuz.uz.api.mapper.article.ArticleShortInfo;
 import kunuz.uz.api.service.ArticleService;
-import kunuz.uz.api.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -21,8 +20,6 @@ import java.util.UUID;
 @RequestMapping(value = "/api/v1/article")
 public class ArticleController {
 
-    @Autowired
-    private JwtUtil jwtUtil;
     //    11. Get Last 4 Article By sectionId, except given article id.
     //        (Berilgan SectionId bo'yicha oxirgi 4-ta maqolani return qiladi. Berilgan maqolaning id-sidan tash)
     //        ArticleShortInfo
@@ -56,29 +53,25 @@ public class ArticleController {
     private ArticleService service;
 
     @PostMapping(value = "")
-    public ResponseEntity<ArticleResponseDTO> create(@RequestHeader(value = "Authorization") String token,
-                                                     @RequestBody ArticleRequestDTO dto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(jwtUtil.moderatorId(token), dto));
+    public ResponseEntity<ArticleResponseDTO> create(@RequestBody ArticleRequestDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(dto));
     }
 
     @PutMapping(value = "")
-    public ResponseEntity<ArticleResponseDTO> update(@RequestHeader(value = "Authorization") String token,
-                                                     @RequestHeader("article-id") UUID articleId,
+    public ResponseEntity<ArticleResponseDTO> update(@RequestHeader("article-id") UUID articleId,
                                                      @RequestBody ArticleRequestDTO dto) {
-        return ResponseEntity.ok(service.update(jwtUtil.moderatorId(token), articleId, dto));
+        return ResponseEntity.ok(service.update(articleId, dto));
     }
 
     @DeleteMapping(value = "")
-    public ResponseEntity<?> delete(@RequestHeader(value = "Authorization") String token,
-                                    @RequestHeader("id") UUID id) {
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(service.delete(jwtUtil.moderatorId(token), id));
+    public ResponseEntity<?> delete(@RequestHeader("id") UUID id) {
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(service.delete(id));
     }
 
     @PutMapping(value = "/status")
     public ResponseEntity<?> changeStatusById(@RequestHeader("article-id") UUID articleId,
-                                              @RequestHeader(value = "Authorization") String token,
                                               @RequestParam("status") ArticleStatus status) {
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(service.changeStatusById(articleId, jwtUtil.publisherId(token), status));
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(service.changeStatusById(articleId, status));
     }
 
     @GetMapping(value = "/by-section")

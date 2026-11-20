@@ -20,13 +20,13 @@ public class ProfileCustomRepository {
     @Autowired
     private EntityManager entityManager;
 
-    public Page<ProfileEntity> filter(int page, int size, ProfileFilterDTO dto) {
+    public Page<ProfileEntity> filter(Long adminId, int page, int size, ProfileFilterDTO dto) {
         StringBuilder selectQueryBuilder = new StringBuilder("select p from ProfileEntity p inner join fetch p.roleList ");
         StringBuilder countQueryBuilder = new StringBuilder("select count(p) from ProfileEntity p inner join p.roleList ");
 
-        StringBuilder queryBuilder = new StringBuilder(" where p.visible = true ");
+        StringBuilder queryBuilder = new StringBuilder(" where p.visible = true and p.adminId = :adminId ");
         Map<String, Object> params = new LinkedHashMap<>();
-
+        params.put("adminId", adminId);
         if (dto.getName() != null && !dto.getName().isBlank()) {
             queryBuilder.append(" and lower(p.name) like lower(:name)");
             params.put("name", "%" + dto.getName() + "%");

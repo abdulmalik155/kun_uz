@@ -37,6 +37,12 @@ public class RegionEntity {
     @Column(name = "key", unique = true, nullable = false, columnDefinition = "varchar(255) default 'region'")
     private String key;
 
+    @Column(name = "admin_id")
+    private Long adminId;
+
+    @ManyToOne
+    @JoinColumn(name = "admin_id", insertable = false, updatable = false, nullable = true)
+    private ProfileEntity admin;
 
     @CreationTimestamp
     @Column(name = "created_date", nullable = false)

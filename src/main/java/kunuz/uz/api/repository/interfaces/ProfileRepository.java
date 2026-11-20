@@ -20,13 +20,16 @@ public interface ProfileRepository extends CrudRepository<ProfileEntity, Long>, 
     @Query(value = "SELECT p FROM ProfileEntity AS p WHERE p.username = ?1 AND p.visible = TRUE")
     Optional<ProfileEntity> findByUsernameAndVisibleTrue(String username);
 
+    @Query(value = "SELECT p FROM ProfileEntity AS p INNER JOIN FETCH p.roleList WHERE p.username = ?1 AND p.visible = TRUE")
+    Optional<ProfileEntity> findByUsernameWithRoles(String username);
+
     @Transactional
     @Modifying
     @Query(value = "UPDATE ProfileEntity AS p SET p.visible = FALSE WHERE p.id = ?1")
     void updateVisibleById(Long id);
 
-    @Query(value = "SELECT p FROM ProfileEntity AS p INNER JOIN FETCH p.roleList WHERE p.visible = TRUE")
-    Page<ProfileEntity> findAllWithRole(Pageable pageable);
+    @Query(value = "SELECT p FROM ProfileEntity AS p INNER JOIN FETCH p.roleList WHERE p.visible = TRUE AND p.adminId = ?1 ")
+    Page<ProfileEntity> findAllWithRole(Long adminId, Pageable pageable);
 
     Optional<ProfileEntity> findByIdAndVisibleTrue(Long id);
 }

@@ -15,6 +15,7 @@ import kunuz.uz.api.mapper.article.ArticleShortInfo;
 import kunuz.uz.api.repository.interfaces.ArticleRepository;
 import kunuz.uz.api.util.ArticleUtil;
 import kunuz.uz.api.util.PaginationUtil;
+import kunuz.uz.api.util.SecurityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -51,7 +52,8 @@ public class ArticleService {
     private ArticleTagService tagService;
 
     @Transactional(rollbackFor = {RuntimeException.class})
-    public ArticleResponseDTO create(Long moderatorId, ArticleRequestDTO dto) {
+    public ArticleResponseDTO create(ArticleRequestDTO dto) {
+        Long moderatorId = SecurityUtil.currentUserId();
         Optional<ArticleEntity> existsOptional = repository.findDuplicate(moderatorId,
                 dto.getRegionId(),
                 dto.getTitle().trim(),
@@ -71,9 +73,9 @@ public class ArticleService {
     }
 
     @Transactional(rollbackFor = {RuntimeException.class})
-    public ArticleResponseDTO update(Long moderatorId, UUID articleId, ArticleRequestDTO dto) {
+    public ArticleResponseDTO update(UUID articleId, ArticleRequestDTO dto) {
         ArticleEntity existing = getOrThrow(articleId);
-        if (!existing.getModeratorId().equals(moderatorId)) {
+        if (!existing.getModeratorId().equals(SecurityUtil.currentUserId())) {
             throw new UnauthorizedProfileException("Unauthorized moderator");
         }
         ArticleEntity updated = repository.save(util.toEntity(dto, existing));
@@ -93,15 +95,16 @@ public class ArticleService {
     }
 
     @Transactional(rollbackFor = {RuntimeException.class})
-    public String delete(Long moderatorId, UUID articleId) {
+    public String delete(UUID articleId) {
         Long articleModeratorId = getOrThrow(articleId).getModeratorId();
-        if (!articleModeratorId.equals(moderatorId)) throw new UnauthorizedProfileException("Unauthorized moderator");
+        if (!articleModeratorId.equals(SecurityUtil.currentUserId())) throw new UnauthorizedProfileException("Unauthorized moderator");
         repository.updateVisibleById(articleId);
         return "Successfully deleted";
     }
 
-    public String changeStatusById(UUID articleId, Long publisherId, ArticleStatus status) {
+    public String changeStatusById(UUID articleId,  ArticleStatus status) {
         ArticleEntity existing = getOrThrow(articleId);
+        Long publisherId = SecurityUtil.currentUserId();
 
         if (existing.getPublisherId() != null && !existing.getPublisherId().equals(publisherId)) {
             throw new IllegalArgumentException("Only the one who published it can change it's status");

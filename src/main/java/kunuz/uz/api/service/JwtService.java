@@ -16,12 +16,11 @@ import java.util.Map;
 
 public class JwtService {
 
-    @Value("${security.jwt.exp-timeout}")
-    private Long tokenLiveTime;
-    @Value("${security.jwt.secret-key}")
-    private String secretKey;
+    private static final Long tokenLiveTime = 86400000L;
 
-    public String encode(String id, String username, List<ProfileRole> roles) {
+    private static final String secretKey = "veryLongSecretmazgillattayevlasharaaxmojonjinnijonsurbetbekkiydirhonuxlatdibekloxovdangasabekochkozjonduxovmashaynikmaydagapchishularnioqiganbolsangizgapyoqaniqsizmazgi";
+
+    public static String encode(String id, String username, List<ProfileRole> roles) {
         Map<String, Object> claims = new LinkedHashMap<>();
         claims.put("username", username);
         claims.put("roles", roles);
@@ -37,7 +36,7 @@ public class JwtService {
     }
 
 
-    public JwtDTO decode(String token) {
+    public static JwtDTO decode(String token) {
         Claims claims = Jwts
                 .parser()
                 .verifyWith(getSignInKey())
@@ -45,13 +44,13 @@ public class JwtService {
                 .parseSignedClaims(token)
                 .getPayload();
 
-        String id = claims.getSubject();
+        Long id = Long.valueOf(claims.getSubject());
         String username = (String) claims.get("username");
         List<ProfileRole> roles = (List<ProfileRole>) claims.get("roles");
         return new JwtDTO(id, username, roles);
     }
 
-    private SecretKey getSignInKey() {
+    private static SecretKey getSignInKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
