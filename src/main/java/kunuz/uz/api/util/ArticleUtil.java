@@ -29,7 +29,7 @@ public class ArticleUtil implements  BaseEntityUtil<ArticleRequestDTO, ArticleRe
         entity.setTitle(dto.getTitle());
         entity.setDescription(dto.getDescription());
         entity.setContent(dto.getContent());
-        entity.setImageId(dto.getImageId());
+//        entity.setImageId(dto.getImageId());
         entity.setRegionId(dto.getRegionId());
         entity.setReadTime(dto.getReadTime());
         return entity;

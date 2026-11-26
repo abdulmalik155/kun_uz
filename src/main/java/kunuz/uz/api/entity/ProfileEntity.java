@@ -60,9 +60,9 @@ public class ProfileEntity {
     @JoinColumn(name = "admin_id", insertable = false, updatable = false, nullable = true)
     private ProfileEntity admin;
 
-    public List<ProfileRole> roleEnums(List<ProfileRoleEntity> roleEntityList){
+    public List<ProfileRole> getRoles(){
         List<ProfileRole> list = new LinkedList<>();
-        for (ProfileRoleEntity profileRoleEntity : roleEntityList) {
+        for (ProfileRoleEntity profileRoleEntity : this.roleList) {
             list.add(profileRoleEntity.getRole());
         }
         return list;

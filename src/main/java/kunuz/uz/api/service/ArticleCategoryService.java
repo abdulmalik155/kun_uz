@@ -3,6 +3,7 @@ package kunuz.uz.api.service;
 import kunuz.uz.api.dto.response.CategoryResponseDTO;
 import kunuz.uz.api.entity.ArticleCategoryEntity;
 import kunuz.uz.api.entity.CategoryEntity;
+import kunuz.uz.api.enums.Language;
 import kunuz.uz.api.mapper.category.CategoryShort;
 import kunuz.uz.api.repository.interfaces.ArticleCategoryRepository;
 import kunuz.uz.api.util.CategoryUtil;
@@ -80,7 +81,7 @@ public class ArticleCategoryService {
         return repository.getAllByArticleIdShort(articleId);
     }
 
-    public List<CategoryShort> findAllByArticleIdAndLang(UUID articleId, String language){
-        return repository.findAllByArticleIdAndLang(articleId, language);
+    public List<CategoryShort> findAllByArticleIdAndLang(UUID articleId, Language language){
+        return repository.findAllByArticleIdAndLang(articleId, language.name());
     }
 }

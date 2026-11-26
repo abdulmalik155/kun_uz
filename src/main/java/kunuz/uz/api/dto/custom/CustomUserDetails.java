@@ -31,7 +31,7 @@ public class CustomUserDetails implements UserDetails {
         this.surname = profile.getSurname();
         this.username = profile.getUsername();
         this.password = profile.getPassword();
-        this.roleList = profile.roleEnums(profile.getRoleList());
+        this.roleList = profile.getRoles();
         this.status = profile.getStatus();
     }
 

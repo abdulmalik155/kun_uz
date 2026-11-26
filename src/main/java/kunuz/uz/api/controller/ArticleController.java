@@ -4,9 +4,8 @@ import kunuz.uz.api.dto.request.ArticleListDTO;
 import kunuz.uz.api.dto.request.ArticleRequestDTO;
 import kunuz.uz.api.dto.response.ArticleFullInfo;
 import kunuz.uz.api.dto.response.ArticleResponseDTO;
+import kunuz.uz.api.dto.response.ArticleShortInfo;
 import kunuz.uz.api.enums.ArticleStatus;
-import kunuz.uz.api.enums.Language;
-import kunuz.uz.api.mapper.article.ArticleShortInfo;
 import kunuz.uz.api.service.ArticleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -20,9 +19,6 @@ import java.util.UUID;
 @RequestMapping(value = "/api/v1/article")
 public class ArticleController {
 
-    //    11. Get Last 4 Article By sectionId, except given article id.
-    //        (Berilgan SectionId bo'yicha oxirgi 4-ta maqolani return qiladi. Berilgan maqolaning id-sidan tash)
-    //        ArticleShortInfo
     //    12. Get 4 most read articles, except given article id . (Ko'p oqilgan oxirgi 4-ta yangilikni return qiladi, berilgan maqoldagan tashqari)
     //        ArticleShortInfo
     //    13. Increase Article View Count by Article Id
@@ -103,20 +99,25 @@ public class ArticleController {
     }
 
     @GetMapping(value = "/by-id-and-lang")
-    public ResponseEntity<ArticleFullInfo> getByIdAndLang(@RequestHeader(value = "article-id") UUID articleId,
-                                                                       @RequestHeader(value = "Accept-Language") Language language) {
-        return ResponseEntity.ok(service.getByIdAndLang( articleId,language));
+    public ResponseEntity<ArticleFullInfo> getByIdAndLang(@RequestHeader(value = "article-id") UUID articleId) {
+        return ResponseEntity.ok(service.getByIdAndLang(articleId));
     }
 
     @GetMapping(value = "/by-tag-name")
-    public ResponseEntity<Page<ArticleFullInfo>> getByTagName(@RequestHeader(value = "tag-name") String name,
-                                                          @RequestParam(value = "page", defaultValue = "1") int page,
-                                                          @RequestParam(value = "size", defaultValue = "10") int size){
-        return ResponseEntity.ok(service.getByTagName(page,size, name));
+    public ResponseEntity<Page<ArticleShortInfo>> getByTagName(@RequestHeader(value = "tag-name") String tagName,
+                                                               @RequestParam(value = "page", defaultValue = "1") int page,
+                                                               @RequestParam(value = "size", defaultValue = "10") int size) {
+        return ResponseEntity.ok(service.getByTagName(page, size, tagName));
     }
 
-    //    10. Get Last N Article By TagName (Berilgan tag nomi bo'yicha oxirgi N-ta yangilikni return qiladi)
-    //        (Pagination bilan ishlaydigan qilish kerak)
-    //        ArticleShortInfo
+    @GetMapping(value = "/last-4-by-section")
+    public ResponseEntity<Page<ArticleShortInfo>> getLast4BySectionId(@RequestHeader("article-id") UUID articleId,
+                                                                      @RequestHeader(value = "section-id") Integer sectionId,
+                                                                      @RequestParam(value = "page", defaultValue = "1") int page,
+                                                                      @RequestParam(value = "size", defaultValue = "4") int size) {
+        return ResponseEntity.ok(service.getLast4BySectionId(articleId, sectionId, page, size));
+    }
 
+    //    12. Get 4 most read articles, except given article id . (Ko'p oqilgan oxirgi 4-ta yangilikni return qiladi, berilgan maqoldagan tashqari)
+    //        ArticleShortInfo
 }

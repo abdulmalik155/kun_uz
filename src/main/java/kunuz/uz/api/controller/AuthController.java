@@ -5,14 +5,13 @@ import jakarta.validation.Valid;
 import kunuz.uz.api.dto.AuthorizationDTO;
 import kunuz.uz.api.dto.ConfirmationDTO;
 import kunuz.uz.api.dto.request.RegistrationDTO;
+import kunuz.uz.api.dto.response.AuthResponseDTO;
 import kunuz.uz.api.dto.response.ProfileResponseDTO;
+import kunuz.uz.api.dto.response.TokenDTO;
 import kunuz.uz.api.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(value = "/api/v1/auth")
@@ -27,7 +26,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ProfileResponseDTO> login(@Valid @RequestBody AuthorizationDTO dto) {
+    public ResponseEntity<AuthResponseDTO> login(@Valid @RequestBody AuthorizationDTO dto) {
         return ResponseEntity.ok(service.login(dto));
     }
 
@@ -35,5 +34,10 @@ public class AuthController {
     public ResponseEntity<?>  confirmation(@Valid @RequestBody ConfirmationDTO dto){
         service.confirm(dto);
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/new-access-token")
+    public ResponseEntity<TokenDTO> getNewAccessToken(@RequestHeader("Refresh-Token") String refreshToken){
+        return ResponseEntity.ok(service.getNewAccessToken(refreshToken));
     }
 }

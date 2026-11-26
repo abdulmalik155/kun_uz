@@ -1,5 +1,8 @@
 package kunuz.uz.api.exceptions.handler;
 
+import io.jsonwebtoken.JwtException;
+import kunuz.uz.api.exceptions.AppBadException;
+import kunuz.uz.api.exceptions.InvalidJwtException;
 import kunuz.uz.api.exceptions.UnauthorizedProfileException;
 import org.jspecify.annotations.Nullable;
 import org.springframework.beans.TypeMismatchException;
@@ -9,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -49,6 +54,33 @@ public class ExceptionHandlerClass extends ResponseEntityExceptionHandler {
     public ResponseEntity<Object> handleAnyRuntimeException(RuntimeException ex){
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
+
+
+    @ExceptionHandler(InvalidJwtException.class)
+    public ResponseEntity<Object> handleInvalidJwtException(InvalidJwtException ex){
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(JwtException.class)
+    public ResponseEntity<Object> handleJwtException(JwtException ex){
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+    }
+
+    @ExceptionHandler(UsernameNotFoundException.class)
+    public ResponseEntity<String> handleUserNotFoundException(UsernameNotFoundException e) {
+        return ResponseEntity.badRequest().body(e.getMessage());
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<String> handleAccessDeniedException(AccessDeniedException e) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+    }
+
+    @ExceptionHandler(AppBadException.class)
+    public ResponseEntity<String> handleAppBadException(AppBadException e){
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    }
+
 
     @ExceptionHandler(value = UnauthorizedProfileException.class)
     public ResponseEntity<Object> handleAnyUnauthorizedProfileException(UnauthorizedProfileException ex){

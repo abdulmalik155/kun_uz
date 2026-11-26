@@ -2,14 +2,17 @@ package kunuz.uz.api.repository.interfaces;
 
 import jakarta.transaction.Transactional;
 import kunuz.uz.api.entity.ArticleEntity;
-import kunuz.uz.api.mapper.article.ArticleShortInfo;
+import kunuz.uz.api.enums.Language;
+import kunuz.uz.api.mapper.article.ArticleShortMapper;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -48,57 +51,91 @@ public interface ArticleRepository extends CrudRepository<ArticleEntity, UUID>, 
 
     @Query(value = "SELECT a.id AS id, " +
             " a.title AS title, " +
-            " a.description AS description, " +
+            " a.description AS description," +
             " a.imageId AS imageId, " +
             " a.publishedDate AS publishedDate " +
             " FROM ArticleEntity AS a " +
             " INNER JOIN a.sectionList AS s " +
-            " WHERE s.sectionId = ?1 " +
+            " WHERE s.sectionId = :sectionId " +
+            " AND a.language = :language " +
             " AND a.visible = TRUE " +
             " AND a.status = 'PUBLISHED'")
-    Page<ArticleShortInfo> findLastNBySectionId(Integer sectionId, Pageable request);
+    Page<ArticleShortMapper> findLastNBySectionId(@Param("sectionId") Integer sectionId,
+                                                  @Param("language") Language language,
+                                                  Pageable request);
 
+    @Query(value = """
+            SELECT a.id AS id,
+            a.title AS title,
+            a.description AS description,
+            a.imageId AS imageId,
+            a.publishedDate AS publishedDate
+            FROM ArticleEntity AS a
+            WHERE a.status = 'PUBLISHED'
+            AND a.visible = TRUE
+            AND a.id NOT IN ?1
+            AND a.language = :language""")
+    Page<ArticleShortMapper> findLast12Except(@Param("articleIds") List<UUID> articleIds,
+                                         @Param("language") Language language,
+                                         Pageable request);
 
     @Query(value = "SELECT a.id AS id, " +
             " a.title AS title, " +
-            " a.description AS description, " +
-            " a.imageId AS imageId, " +
-            " a.publishedDate AS publishedDate " +
-            " FROM ArticleEntity AS a " +
-            " WHERE a.status = 'PUBLISHED' " +
-            " AND a.visible = TRUE " +
-            " AND a.id NOT IN ?1 ")
-    Page<ArticleShortInfo> findLast12Except(List<UUID> articleIds, Pageable request);
-
-    @Query(value = "SELECT a.id AS id, " +
-            " a.title AS title, " +
-            " a.description AS description, " +
+            " a.description AS description," +
             " a.imageId AS imageId, " +
             " a.publishedDate AS publishedDate " +
             " FROM ArticleEntity AS a " +
             " INNER JOIN a.categoryList AS c " +
-            " WHERE c.categoryId = ?1 " +
+            " WHERE c.categoryId = :categoryId " +
+            " AND a.language = :language " +
             " AND a.visible = TRUE " +
             " AND a.status = 'PUBLISHED'")
-    Page<ArticleShortInfo> findLastNByCategoryId(Integer categoryId, Pageable request);
+    Page<ArticleShortMapper> findLastNByCategoryId(@Param("categoryId") Integer categoryId,
+                                              @Param("language") Language language,
+                                              Pageable request);
 
     @Query(value = "SELECT a " +
             " FROM ArticleEntity AS a " +
             " INNER JOIN a.region AS r " +
-            " WHERE r.id = ?1 " +
+            " WHERE r.id = :regionId " +
+            " AND a.language = :language " +
             " AND a.visible = TRUE " +
             " AND a.status = 'PUBLISHED'")
-    Page<ArticleEntity> findLastNByRegionId(Integer regionId, Pageable request);
+    Page<ArticleEntity> findLastNByRegionId(@Param("regionId") Integer regionId,
+                                            @Param("language") Language language, Pageable request);
 
-    @Query(value = "SELECT a " +
+    @Query(value = "SELECT a.id AS id, " +
+            " a.title AS title, " +
+            " a.description AS description," +
+            " a.imageId AS imageId, " +
+            " a.publishedDate AS publishedDate " +
             " FROM ArticleEntity AS a " +
             " INNER JOIN ArticleTagEntity AS articleTag ON articleTag.articleId = a.id " +
             " INNER JOIN TagEntity AS tag ON articleTag.tagId = tag.id " +
             " WHERE a.visible = TRUE " +
-            " AND tag.name = ?1")
-    Page<ArticleEntity> findLastNByTagName(String name, Pageable request);
+            " AND a.language = :language " +
+            " AND tag.name = :tagName ")
+    Page<ArticleShortMapper> findLastNByTagName(@Param("tagName") String tagName,
+                                           @Param("language") Language language, Pageable request);
 
     ArticleEntity findByIdAndModeratorId(UUID articleId, Long moderatorId);
+
+    @Query(value = "SELECT a.id AS id, " +
+            " a.title AS title, " +
+            " a.description AS description," +
+            " a.imageId AS imageId, " +
+            " a.publishedDate AS publishedDate " +
+            " FROM ArticleEntity AS a " +
+            " INNER JOIN a.sectionList AS s " +
+            " WHERE a.status = 'PUBLISHED' " +
+            " AND a.visible = TRUE " +
+            " AND a.id <> :articleId " +
+            " AND a.language = :language " +
+            " AND s.sectionId = :sectionId ")
+    Page<ArticleShortMapper> findLast4BySectionIdExcept(@Param("sectionId") Integer sectionId,
+                                                   @Param("articleId") UUID articleId,
+                                                   @Param("language") Language language,
+                                                   PageRequest request);
 
 
 //    @Query(value = "SELECT a " +
@@ -108,6 +145,6 @@ public interface ArticleRepository extends CrudRepository<ArticleEntity, UUID>, 
 //            "  " +
 //            " WHERE a.id = :articleId AND a.visible = TRUE")
 //    Page<ArticleEntity> findLastNByIdAndLang(@Param(value = "articleId") UUID articleId,
-//                                             @Param(value = "lang") String language,
+//                                             @Param(value = "lang") Language language,
 //                                             Pageable request);
 }

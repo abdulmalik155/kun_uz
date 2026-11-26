@@ -2,18 +2,19 @@ package kunuz.uz.api.service;
 
 import kunuz.uz.api.dto.request.ArticleListDTO;
 import kunuz.uz.api.dto.request.ArticleRequestDTO;
+import kunuz.uz.api.dto.response.ArticleFullInfo;
 import kunuz.uz.api.dto.response.ArticleResponseDTO;
+import kunuz.uz.api.dto.response.ArticleShortInfo;
 import kunuz.uz.api.entity.ArticleEntity;
 import kunuz.uz.api.enums.ArticleStatus;
 import kunuz.uz.api.enums.Language;
-import kunuz.uz.api.enums.ProfileRole;
-import kunuz.uz.api.exceptions.ArticleExistsException;
+import kunuz.uz.api.exceptions.AppBadException;
 import kunuz.uz.api.exceptions.ArticleNotFoundException;
-import kunuz.uz.api.dto.response.ArticleFullInfo;
 import kunuz.uz.api.exceptions.UnauthorizedProfileException;
-import kunuz.uz.api.mapper.article.ArticleShortInfo;
+import kunuz.uz.api.mapper.article.ArticleShortMapper;
 import kunuz.uz.api.repository.interfaces.ArticleRepository;
 import kunuz.uz.api.util.ArticleUtil;
+import kunuz.uz.api.util.LanguageUtil;
 import kunuz.uz.api.util.PaginationUtil;
 import kunuz.uz.api.util.SecurityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +28,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -54,15 +54,9 @@ public class ArticleService {
     @Transactional(rollbackFor = {RuntimeException.class})
     public ArticleResponseDTO create(ArticleRequestDTO dto) {
         Long moderatorId = SecurityUtil.currentUserId();
-        Optional<ArticleEntity> existsOptional = repository.findDuplicate(moderatorId,
-                dto.getRegionId(),
-                dto.getTitle().trim(),
-                dto.getDescription().trim(),
-                dto.getContent().trim());
-        if (existsOptional.isPresent()) {
-            throw new ArticleExistsException("Article exists");
-        }
         ArticleEntity newArticle = util.toEntity(dto, new ArticleEntity());
+        Language language = LanguageUtil.currentLang();
+        newArticle.setLanguage(language);
         newArticle.setModeratorId(moderatorId);
         repository.save(newArticle);
         categoryService.create(newArticle.getId(), dto.getCategoryList());
@@ -75,14 +69,18 @@ public class ArticleService {
     @Transactional(rollbackFor = {RuntimeException.class})
     public ArticleResponseDTO update(UUID articleId, ArticleRequestDTO dto) {
         ArticleEntity existing = getOrThrow(articleId);
-        if (!existing.getModeratorId().equals(SecurityUtil.currentUserId())) {
+        Long profileId= SecurityUtil.currentUserId();
+        if (!existing.getModeratorId().equals(profileId)) {
             throw new UnauthorizedProfileException("Unauthorized moderator");
         }
-        ArticleEntity updated = repository.save(util.toEntity(dto, existing));
+        ArticleEntity updated = util.toEntity(dto,existing);
+        updated.setUpdatedBy(profileId);
+        updated.setUpdatedDate(LocalDateTime.now());
+        ArticleEntity saved = repository.save(updated);
         categoryService.merge(articleId, dto.getCategoryList());
         sectionService.merge(articleId, dto.getSectionList());
         tagService.merge(articleId, dto.getTagList());
-        ArticleResponseDTO response = util.toDto(updated);
+        ArticleResponseDTO response = util.toDto(saved);
         return response;
     }
 
@@ -96,13 +94,16 @@ public class ArticleService {
 
     @Transactional(rollbackFor = {RuntimeException.class})
     public String delete(UUID articleId) {
+        //gotta save who deleted the article
+        //and
         Long articleModeratorId = getOrThrow(articleId).getModeratorId();
-        if (!articleModeratorId.equals(SecurityUtil.currentUserId())) throw new UnauthorizedProfileException("Unauthorized moderator");
+        if (!articleModeratorId.equals(SecurityUtil.currentUserId()))
+            throw new UnauthorizedProfileException("Unauthorized moderator");
         repository.updateVisibleById(articleId);
         return "Successfully deleted";
     }
 
-    public String changeStatusById(UUID articleId,  ArticleStatus status) {
+    public String changeStatusById(UUID articleId, ArticleStatus status) {
         ArticleEntity existing = getOrThrow(articleId);
         Long publisherId = SecurityUtil.currentUserId();
 
@@ -115,10 +116,10 @@ public class ArticleService {
         if (existing.getPublishedDate() == null && status.equals(ArticleStatus.NOT_PUBLISHED)) {
             throw new IllegalArgumentException("It's already in not published status(it was not published at all)");
         }
-        if (status.equals(ArticleStatus.PUBLISHED) && existing.getPublishedDate() != null && existing.getStatus().equals(ArticleStatus.PUBLISHED)) {
+        if (status.equals(ArticleStatus.PUBLISHED) && (existing.getPublishedDate() != null && existing.getStatus().equals(status))) {
             throw new IllegalArgumentException("Kallavaram! it's already published");
         }
-        if (status.equals(ArticleStatus.PUBLISHED)) {
+        if (status.equals(ArticleStatus.PUBLISHED) && existing.getPublishedDate() == null && existing.getStatus().equals(ArticleStatus.NOT_PUBLISHED)) {
             existing.setPublishedDate(LocalDateTime.now());
         }
         existing.setStatus(status);
@@ -131,40 +132,83 @@ public class ArticleService {
         PaginationUtil.check(page, size);
         page--;
         PageRequest request = PageRequest.of(page, size, Sort.by("createdDate").descending());
-        Page<ArticleShortInfo> entities = repository.findLastNBySectionId(sectionId, request);
-        return entities;
+        Language language = LanguageUtil.currentLang();
+        Page<ArticleShortMapper> entities = repository.findLastNBySectionId(sectionId, language, request);
+        return new PageImpl<>(toShortInfoList(entities.getContent()), entities.getPageable(), entities.getTotalElements());
     }
 
     public Page<ArticleShortInfo> getLast12Except(ArticleListDTO dto, int page, int size) {
         PaginationUtil.check(page, size);
         page--;
         PageRequest request = PageRequest.of(page, size, Sort.by("createdDate").descending());
-        Page<ArticleShortInfo> entities = repository.findLast12Except(dto.getArticleIds(), request);
-        return entities;
+        Language language = LanguageUtil.currentLang();
+        Page<ArticleShortMapper> entities = repository.findLast12Except(dto.getArticleIds(), language, request);
+        return new PageImpl<>(toShortInfoList(entities.getContent()), entities.getPageable(), entities.getTotalElements());
     }
 
     public Page<ArticleShortInfo> getByCategoryId(int page, int size, Integer categoryId) {
         PaginationUtil.check(page, size);
         page--;
         PageRequest request = PageRequest.of(page, size, Sort.by("createdDate").descending());
-        Page<ArticleShortInfo> entities = repository.findLastNByCategoryId(categoryId, request);
-        return entities;
+        Language language = LanguageUtil.currentLang();
+        Page<ArticleShortMapper> entities = repository.findLastNByCategoryId(categoryId, language, request);
+        return new PageImpl<>(toShortInfoList(entities.getContent()), entities.getPageable(), entities.getTotalElements());
     }
 
     public Page<ArticleFullInfo> getByRegionId(int page, int size, Integer regionId) {
         PaginationUtil.check(page, size);
         page--;
         PageRequest request = PageRequest.of(page, size, Sort.by("createdDate").descending());
-        Page<ArticleEntity> entities = repository.findLastNByRegionId(regionId, request);
+        Language language = LanguageUtil.currentLang();
+        Page<ArticleEntity> entities = repository.findLastNByRegionId(regionId, language, request);
         List<ArticleFullInfo> list = new LinkedList<>();
         for (ArticleEntity entity : entities.getContent()) {
-            ArticleFullInfo info = toFullInfo(entity, Language.UZ.toString());
+            ArticleFullInfo info = toFullInfo(entity);
             list.add(info);
         }
         return new PageImpl<>(list, entities.getPageable(), entities.getTotalElements());
     }
 
-    private ArticleFullInfo toFullInfo(ArticleEntity entity, String language) {
+    ///TODO gotta add the language uz ru en in article entity and then get it by id and lang
+    public ArticleFullInfo getByIdAndLang(UUID articleId) {
+        Language language = LanguageUtil.currentLang();
+        ArticleEntity existing = getOrThrow(articleId);
+        if(!existing.getLanguage().equals(language)){
+            throw new AppBadException("Given article is not in chosen language");
+        }
+        return toFullInfo(existing);
+    }
+
+    public Page<ArticleShortInfo> getByTagName(int page, int size, String tagName) {
+        PaginationUtil.check(page, size);
+        page--;
+        PageRequest request = PageRequest.of(page, size, Sort.by("createdDate").descending());
+        Language language = LanguageUtil.currentLang();
+        Page<ArticleShortMapper> entities = repository.findLastNByTagName(tagName.trim(), language, request);
+        return new PageImpl<>(toShortInfoList(entities.getContent()), entities.getPageable(), entities.getTotalElements());
+    }
+
+    private ArticleShortInfo toShortInfo(ArticleShortMapper mapper) {
+        ArticleShortInfo shortInfo = new ArticleShortInfo();
+        shortInfo.setId(mapper.getId());
+        shortInfo.setTitle(mapper.getTitle());
+        shortInfo.setDescription(mapper.getDescription());
+//        shortInfo.setImage(mapper.getImage().toResponseDTO());
+        shortInfo.setPublishedDate(mapper.getPublishedDate());
+        return shortInfo;
+    }
+
+    private List<ArticleShortInfo> toShortInfoList(List<ArticleShortMapper> mapperList) {
+        List<ArticleShortInfo> shortInfoList = new LinkedList<>();
+        for (ArticleShortMapper mapper : mapperList) {
+            ArticleShortInfo info = toShortInfo(mapper);
+            shortInfoList.add(info);
+        }
+        return shortInfoList;
+    }
+
+    private ArticleFullInfo toFullInfo(ArticleEntity entity) {
+        Language language = LanguageUtil.currentLang();
         ArticleFullInfo info = new ArticleFullInfo();
         info.setId(entity.getId());
         info.setTitle(entity.getTitle());
@@ -180,21 +224,12 @@ public class ArticleService {
         return info;
     }
 
-    public ArticleFullInfo getByIdAndLang(UUID articleId, Language language) {
-        ArticleEntity existing = getOrThrow(articleId);
-        return toFullInfo(existing, language.toString());
-    }
-
-    public Page<ArticleFullInfo> getByTagName(int page, int size, String name) {
+    public Page<ArticleShortInfo> getLast4BySectionId(UUID articleId, Integer sectionId, int page, int size) {
         PaginationUtil.check(page, size);
         page--;
         PageRequest request = PageRequest.of(page, size, Sort.by("createdDate").descending());
-        Page<ArticleEntity> entities = repository.findLastNByTagName(name.trim(), request);
-        List<ArticleFullInfo> list = new LinkedList<>();
-        for (ArticleEntity entity : entities.getContent()) {
-            ArticleFullInfo info = toFullInfo(entity, Language.UZ.toString());
-            list.add(info);
-        }
-        return new PageImpl<>(list, entities.getPageable(), entities.getTotalElements());
+        Language language = LanguageUtil.currentLang();
+        Page<ArticleShortMapper> entities = repository.findLast4BySectionIdExcept(sectionId, articleId, language, request);
+        return new PageImpl<>(toShortInfoList(entities.getContent()), entities.getPageable(), entities.getTotalElements());
     }
 }

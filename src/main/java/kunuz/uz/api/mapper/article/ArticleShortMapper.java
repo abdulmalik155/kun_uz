@@ -4,7 +4,7 @@ package kunuz.uz.api.mapper.article;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public interface ArticleShortInfo {
+public interface ArticleShortMapper {
 
     UUID getId();
 

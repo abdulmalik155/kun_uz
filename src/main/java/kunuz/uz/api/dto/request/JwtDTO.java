@@ -1,6 +1,7 @@
 package kunuz.uz.api.dto.request;
 
 import kunuz.uz.api.enums.ProfileRole;
+import kunuz.uz.api.enums.TokenType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,4 +15,5 @@ public class JwtDTO {
     private Long id;
     private String username;
     private List<ProfileRole> role;
+    private TokenType tokenType;
 }

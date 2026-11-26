@@ -3,6 +3,7 @@ package kunuz.uz.api.repository.interfaces;
 import jakarta.transaction.Transactional;
 import kunuz.uz.api.entity.ArticleSectionEntity;
 import kunuz.uz.api.entity.SectionEntity;
+import kunuz.uz.api.enums.Language;
 import kunuz.uz.api.mapper.category.CategoryShort;
 import kunuz.uz.api.mapper.section.SectionShort;
 import org.springframework.data.jpa.repository.Modifying;
