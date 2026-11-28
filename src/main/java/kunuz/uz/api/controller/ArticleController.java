@@ -1,5 +1,6 @@
 package kunuz.uz.api.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import kunuz.uz.api.dto.request.ArticleListDTO;
 import kunuz.uz.api.dto.request.ArticleRequestDTO;
 import kunuz.uz.api.dto.response.ArticleFullInfo;
@@ -7,6 +8,7 @@ import kunuz.uz.api.dto.response.ArticleResponseDTO;
 import kunuz.uz.api.dto.response.ArticleShortInfo;
 import kunuz.uz.api.enums.ArticleStatus;
 import kunuz.uz.api.service.ArticleService;
+import kunuz.uz.api.util.HttpRequestUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -118,6 +120,21 @@ public class ArticleController {
         return ResponseEntity.ok(service.getLast4BySectionId(articleId, sectionId, page, size));
     }
 
+    @PostMapping(value = "/{id}/view")
+    public ResponseEntity<?> increaseArticleView(@PathVariable("id") UUID articleId, HttpServletRequest request){
+        String clientIp = HttpRequestUtil.getClientIp(request);
+        service.incrementViewIfUnique(articleId, clientIp);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping(value = "/{id}/share")
+    public ResponseEntity<?> increaseArticleShareCount(@PathVariable("id") UUID articleId, HttpServletRequest request){
+        String clientIp = HttpRequestUtil.getClientIp(request);
+        service.incrementShareCount(articleId, clientIp);
+        return ResponseEntity.ok().build();
+    }
+    //    13. Increase Article View Count by Article Id
+    //          (article_id)
     //    12. Get 4 most read articles, except given article id . (Ko'p oqilgan oxirgi 4-ta yangilikni return qiladi, berilgan maqoldagan tashqari)
     //        ArticleShortInfo
 }

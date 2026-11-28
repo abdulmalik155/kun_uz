@@ -22,9 +22,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
@@ -51,6 +53,9 @@ public class ArticleService {
     @Autowired
     private ArticleTagService tagService;
 
+    @Autowired
+    private RedisService redisService;
+
     @Transactional(rollbackFor = {RuntimeException.class})
     public ArticleResponseDTO create(ArticleRequestDTO dto) {
         Long moderatorId = SecurityUtil.currentUserId();
@@ -69,11 +74,11 @@ public class ArticleService {
     @Transactional(rollbackFor = {RuntimeException.class})
     public ArticleResponseDTO update(UUID articleId, ArticleRequestDTO dto) {
         ArticleEntity existing = getOrThrow(articleId);
-        Long profileId= SecurityUtil.currentUserId();
+        Long profileId = SecurityUtil.currentUserId();
         if (!existing.getModeratorId().equals(profileId)) {
             throw new UnauthorizedProfileException("Unauthorized moderator");
         }
-        ArticleEntity updated = util.toEntity(dto,existing);
+        ArticleEntity updated = util.toEntity(dto, existing);
         updated.setUpdatedBy(profileId);
         updated.setUpdatedDate(LocalDateTime.now());
         ArticleEntity saved = repository.save(updated);
@@ -169,11 +174,11 @@ public class ArticleService {
         return new PageImpl<>(list, entities.getPageable(), entities.getTotalElements());
     }
 
-    ///TODO gotta add the language uz ru en in article entity and then get it by id and lang
+    /// TODO gotta add the language uz ru en in article entity and then get it by id and lang
     public ArticleFullInfo getByIdAndLang(UUID articleId) {
         Language language = LanguageUtil.currentLang();
         ArticleEntity existing = getOrThrow(articleId);
-        if(!existing.getLanguage().equals(language)){
+        if (!existing.getLanguage().equals(language)) {
             throw new AppBadException("Given article is not in chosen language");
         }
         return toFullInfo(existing);
@@ -208,6 +213,7 @@ public class ArticleService {
     }
 
     private ArticleFullInfo toFullInfo(ArticleEntity entity) {
+        //TODO gotta fix n + 1 problem here
         Language language = LanguageUtil.currentLang();
         ArticleFullInfo info = new ArticleFullInfo();
         info.setId(entity.getId());
@@ -231,5 +237,48 @@ public class ArticleService {
         Language language = LanguageUtil.currentLang();
         Page<ArticleShortMapper> entities = repository.findLast4BySectionIdExcept(sectionId, articleId, language, request);
         return new PageImpl<>(toShortInfoList(entities.getContent()), entities.getPageable(), entities.getTotalElements());
+    }
+
+    @Transactional(rollbackFor = {RuntimeException.class})
+    public void incrementViewIfUnique(UUID articleId, String clientIp) {
+        String key = "article:view:" + articleId + ":" + clientIp;
+        try {
+            boolean saved = redisService.saveIfAbsent(key, LocalDateTime.now().toString(), Duration.ofMinutes(3));
+            if (!saved) {
+                return;
+            }
+        } catch (RedisConnectionFailureException e) {
+            e.printStackTrace();
+            System.out.println("Iye exceptionku bu incrementViewIfUnique : RedisConnectionFailureException");
+            throw new RuntimeException("Something went wrong :(", e);
+        }
+
+        int updated = repository.increaseViewCount(articleId);
+        if (updated == 0) {
+            redisService.delete(key);
+        }
+    }
+
+    @Transactional(rollbackFor = {RuntimeException.class})
+    public void incrementShareCount(UUID articleId, String clientIp) {
+        String key = "article:share:" + articleId + ":" + clientIp;
+
+        try {
+            String sharedCountStr = redisService.get(key);
+            if(sharedCountStr != null){
+                if(Long.parseLong(sharedCountStr) == 5){
+                    throw new AppBadException("Sharing is temporarily not allowed");
+                }
+            }
+             redisService.increment(key,  Duration.ofHours(1));
+        } catch (RedisConnectionFailureException e) {
+            e.printStackTrace();
+            System.out.println("Iye exceptionku bu incrementShareCount : RedisConnectionFailureException");
+            throw new RuntimeException("Something went wrong :(", e);
+        }
+        int updated = repository.increaseShareCount(articleId);
+        if(updated == 0){
+            redisService.delete(key);
+        }
     }
 }

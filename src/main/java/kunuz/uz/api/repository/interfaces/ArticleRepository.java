@@ -76,8 +76,8 @@ public interface ArticleRepository extends CrudRepository<ArticleEntity, UUID>, 
             AND a.id NOT IN ?1
             AND a.language = :language""")
     Page<ArticleShortMapper> findLast12Except(@Param("articleIds") List<UUID> articleIds,
-                                         @Param("language") Language language,
-                                         Pageable request);
+                                              @Param("language") Language language,
+                                              Pageable request);
 
     @Query(value = "SELECT a.id AS id, " +
             " a.title AS title, " +
@@ -91,8 +91,8 @@ public interface ArticleRepository extends CrudRepository<ArticleEntity, UUID>, 
             " AND a.visible = TRUE " +
             " AND a.status = 'PUBLISHED'")
     Page<ArticleShortMapper> findLastNByCategoryId(@Param("categoryId") Integer categoryId,
-                                              @Param("language") Language language,
-                                              Pageable request);
+                                                   @Param("language") Language language,
+                                                   Pageable request);
 
     @Query(value = "SELECT a " +
             " FROM ArticleEntity AS a " +
@@ -116,7 +116,7 @@ public interface ArticleRepository extends CrudRepository<ArticleEntity, UUID>, 
             " AND a.language = :language " +
             " AND tag.name = :tagName ")
     Page<ArticleShortMapper> findLastNByTagName(@Param("tagName") String tagName,
-                                           @Param("language") Language language, Pageable request);
+                                                @Param("language") Language language, Pageable request);
 
     ArticleEntity findByIdAndModeratorId(UUID articleId, Long moderatorId);
 
@@ -133,9 +133,29 @@ public interface ArticleRepository extends CrudRepository<ArticleEntity, UUID>, 
             " AND a.language = :language " +
             " AND s.sectionId = :sectionId ")
     Page<ArticleShortMapper> findLast4BySectionIdExcept(@Param("sectionId") Integer sectionId,
-                                                   @Param("articleId") UUID articleId,
-                                                   @Param("language") Language language,
-                                                   PageRequest request);
+                                                        @Param("articleId") UUID articleId,
+                                                        @Param("language") Language language,
+                                                        PageRequest request);
+
+    @Modifying
+    @Transactional
+    @Query(value = """
+            UPDATE ArticleEntity AS a
+            SET a.viewCount = COALESCE(a.viewCount,0) + 1
+            WHERE a.id = ?1
+            """)
+    int increaseViewCount(UUID articleId);
+
+
+    @Modifying
+    @Transactional
+    @Query(value = """
+            UPDATE ArticleEntity AS a
+            SET a.sharedCount = COALESCE(a.sharedCount,0) + 1
+            WHERE a.id = ?1
+            """)
+    int increaseShareCount(UUID articleId);
+
 
 
 //    @Query(value = "SELECT a " +
